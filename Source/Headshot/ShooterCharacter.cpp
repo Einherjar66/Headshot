@@ -16,12 +16,12 @@ AShooterCharacter::AShooterCharacter()
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
 	SpringArmComponent->SetupAttachment(GetRootComponent());
 	SpringArmComponent->TargetArmLength = 300.f;
-	SpringArmComponent->bUsePawnControlRotation = true;		// Rotate the arm based on the controller
+	SpringArmComponent->bUsePawnControlRotation = true;					// Rotate the arm based on the controller
 	
 	// Create Follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
-	FollowCamera->bUsePawnControlRotation = false;			// Camera does not relative to arm 
+	FollowCamera->bUsePawnControlRotation = false;						// Camera does not relative to arm 
 
 }
 
@@ -30,6 +30,35 @@ void AShooterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void AShooterCharacter::MoveForward(float Value)						// Value ist mit dem input wert der in der UE hinterlegt ist gebunden. (Das ist die 1.0 im input Fenster)
+{
+
+	if ((Controller != nullptr) && (Value != 0.f))						// Verify that the controller is valid & if Value != 0.f then do nothing
+	{
+		// Find out witch way is forward
+		const FRotator Rotation{ Controller->GetControlRotation() };	// Get the Controller Rotation
+		const FRotator YawRotation{ 0.f,Rotation.Yaw, 0.f };			// From the controller rotation, We want only the yaw Rotation
+
+		const FVector Direction{ FRotationMatrix{YawRotation}.GetUnitAxis(EAxis::X) };
+
+		AddMovementInput(Direction,Value);								// Moves the Character
+	}
+}
+
+void AShooterCharacter::MoveRight(float Value)
+{
+	if ((Controller != nullptr) && (Value != 0.f))						// Verify that the controller is valid & if Value != 0.f then do nothing
+	{
+		// Find out witch way is Right
+		const FRotator Rotation{ Controller->GetControlRotation() };	// Get the Controller Rotation
+		const FRotator YawRotation{ 0.f,Rotation.Yaw, 0.f };			// From the controller rotation, We want only the yaw Rotation
+
+		const FVector Direction{ FRotationMatrix{YawRotation}.GetUnitAxis(EAxis::Y) };
+
+		AddMovementInput(Direction, Value);								// Moves the Character
+	}
 }
 
 // Called every frame
@@ -43,6 +72,9 @@ void AShooterCharacter::Tick(float DeltaTime)
 void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	check(PlayerInputComponent)
 
+	PlayerInputComponent->BindAxis("MoveForward", this, &AShooterCharacter::MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &AShooterCharacter::MoveRight);
 }
 
