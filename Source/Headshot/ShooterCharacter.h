@@ -26,6 +26,18 @@ protected:
 
 	void MoveForward(float Value);	// Called for Forward / backward input
 	void MoveRight(float Value);	// Called for side to side input
+	
+	/**
+	 * Called via input to turn at a given rate
+	 * @param Rate This is a normalized rate i.e. 1.0 means 100% of desired turn rate
+	 */
+	void TurnAtRate(float Rate); 
+
+	/**
+	 * Called via input to up/down at a given rate
+	 * @param Rate This is a normalized rate i.e. 1.0 means 100% of desired  rate
+	 */
+	void LooUpAtRate(float Rate);
 
 private:
 
@@ -36,6 +48,15 @@ private:
 	class USpringArmComponent* SpringArmComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))	// Camera follows the character
 	class UCameraComponent* FollowCamera;
+
+	/**
+	 *  Variables
+	 */
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))	// Base turn rate, in deg/sec. Other scaling may affect final turn rate
+	float BaseTurnRate;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))	// Base look up/down rate, in deg/sec. Other scaling may affect final turn rate
+	float BaseLookUpRate;
 
 public:
 
