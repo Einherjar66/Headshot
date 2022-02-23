@@ -8,7 +8,7 @@
 
 void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime)
 {
-	if (ShooterCharacter == nullptr) // Wenn der Shooter Character null ist.
+	if (ShooterCharacter == nullptr)															// Wenn der ShooterCharacter null ist.
 	{ 
 		ShooterCharacter = Cast<AShooterCharacter>(TryGetPawnOwner());							// Dann versuch die AnimInstance wieder zurückzuholen.
 	}
@@ -21,7 +21,7 @@ void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime)
 		Speed = Velocity.Size();
 
 		// Is the character in the air?
-		bIsInAir = ShooterCharacter->GetCharacterMovement()->IsFalling();						// Checkt ob der Character am fallen ist oder nicht
+		bIsInAir = ShooterCharacter->GetCharacterMovement()->IsFalling();						// Checkt ob der Character am "fallen" ist oder nicht
 
 		// Is the Char accelerating ?
 		if (ShooterCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f)	// Checkt ob der Char "Beschleunigt"

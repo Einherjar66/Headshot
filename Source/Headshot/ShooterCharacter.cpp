@@ -6,6 +6,7 @@
 #include "GameFramework/SpringArmComponent.h"
 
 #include "Camera/CameraComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Engine/World.h"
 
 // Sets default values
@@ -25,6 +26,16 @@ AShooterCharacter::AShooterCharacter() : BaseTurnRate(45.f), BaseLookUpRate(45.f
 	FollowCamera->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;						// Camera does not relative to arm 
 
+	// Don't rotate when the controller rotates. Let the Controller only affect the camera
+ 	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationRoll = false;
+
+	// Configure Char Movement
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 540.f, 0.f); // Lets the camera rotate in Yaw (Left & Right)
+	GetCharacterMovement()->JumpZVelocity = 600.f;
+	GetCharacterMovement()->AirControl = .2f;
 
 }
 
