@@ -11,6 +11,9 @@
 #include "Sound/SoundCue.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "Particles/ParticleSystemComponent.h"
+
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 AShooterCharacter::AShooterCharacter() : BaseTurnRate(45.f), BaseLookUpRate(45.f)
@@ -23,7 +26,8 @@ AShooterCharacter::AShooterCharacter() : BaseTurnRate(45.f), BaseLookUpRate(45.f
 	SpringArmComponent->SetupAttachment(GetRootComponent());
 	SpringArmComponent->TargetArmLength = 300.f;
 	SpringArmComponent->bUsePawnControlRotation = true;					// Rotate the arm based on the controller
-	
+	SpringArmComponent->SocketOffset = FVector(0., 50.f, 50.f);
+
 	// Create Follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
@@ -31,12 +35,12 @@ AShooterCharacter::AShooterCharacter() : BaseTurnRate(45.f), BaseLookUpRate(45.f
 
 	// Don't rotate when the controller rotates. Let the Controller only affect the camera
  	bUseControllerRotationPitch = false;
-	bUseControllerRotationYaw = false;
+	bUseControllerRotationYaw = true;
 	bUseControllerRotationRoll = false;
 
 	// Configure Char Movement
-	GetCharacterMovement()->bOrientRotationToMovement = true;
-	GetCharacterMovement()->RotationRate = FRotator(0.f, 540.f, 0.f); // Lets the camera rotate in Yaw (Left & Right)
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 540.f, 0.f);	// Lets the camera rotate in Yaw (Left & Right)
 	GetCharacterMovement()->JumpZVelocity = 600.f;
 	GetCharacterMovement()->AirControl = .2f;
 
@@ -100,21 +104,98 @@ void AShooterCharacter::FireWeapon()
 	const USkeletalMeshSocket* BarrelSocket = GetMesh()->GetSocketByName("BarrelSocket");
 	if (BarrelSocket)
 	{
-		const FTransform SocketTranform = BarrelSocket->GetSocketTransform(GetMesh());
+		const FTransform SocketTransform = BarrelSocket->GetSocketTransform(GetMesh());	// TODO -> FTransform <- Need a comment  
 		
 		if (MuzzelFlash)
 		{
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzelFlash, SocketTranform);
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzelFlash, SocketTransform);
 
 		}
-	}
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 
+		FVector BeamEnd;
+		bool bBeamEnd = GetBeamEndLocation(SocketTransform.GetLocation(), BeamEnd);
+		if (bBeamEnd)
+		{
+			if (ImpactParticles)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, BeamEnd);
+			}
+			UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BeamParticles, SocketTransform);
+			
+			if (Beam)
+			{
+				Beam->SetVectorParameter(FName("Target"), BeamEnd); 
+			}
+			
+		}
+	}
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && HipFire)
 	{
 		AnimInstance->Montage_Play(HipFire);
 		AnimInstance->Montage_JumpToSection(FName("StartFire"));
 	}
+
+}
+
+bool AShooterCharacter::GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBemLocation)
+{
+	/**
+	 *  Video 35. Directing Rifle Shots. Da mir noch einpaar sachen noch nicht ganz klar sind -> Nochmals Anshen <-
+	 */
+
+	// Get Current size of the viewport 
+	FVector2D ViewportSize;
+	if (GEngine && GEngine->GameViewport)									// GEngine is a Global Engine pointer there hold the viewport
+	{
+		GEngine->GameViewport->GetViewportSize(ViewportSize);				// Get the viewport size and save in "ViewportSize"
+	}
+
+	// Get Screen space location of crosshairs
+	FVector2D CrosshairLocation(ViewportSize.X / 2, ViewportSize.Y / 2);	// Get the middle of Viewport
+	CrosshairLocation.Y -= 50.f;
+	FVector CrosshairWoldPosition;
+	FVector CrosshairWorldDirection;
+
+	// Get world position an direction of crosshairs
+	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(UGameplayStatics::GetPlayerController(this, 0),
+		CrosshairLocation,
+		CrosshairWoldPosition,
+		CrosshairWorldDirection);						// Get the world Location of the Crosshair
+
+	if (bScreenToWorld) // was deprojection successful?
+	{
+		FHitResult ScreenTraceHit;
+		const FVector Start{ CrosshairWoldPosition };
+		const FVector End{ CrosshairWoldPosition + CrosshairWorldDirection * 50'000.f };
+
+		// Set beam end point to line trace end point
+		OutBemLocation = End;
+
+		// Trace outward from crosshairs world location
+		GetWorld()->LineTraceSingleByChannel(ScreenTraceHit, Start, End, ECollisionChannel::ECC_Visibility);
+
+		if (ScreenTraceHit.bBlockingHit)									// was there a trace hit?
+		{
+			OutBemLocation = ScreenTraceHit.Location;							// Beam end point is now trace hit location
+
+		}
+
+		// Perform a second trace, this time from the gun barrel
+		FHitResult WeaponTraceHit;
+		const FVector WaponTraceStart{ MuzzleSocketLocation };
+		const FVector WeaponTraceEnd{ OutBemLocation };
+		GetWorld()->LineTraceSingleByChannel(WeaponTraceHit, WaponTraceStart, WeaponTraceEnd, ECollisionChannel::ECC_Visibility);
+
+
+		if (WeaponTraceHit.bBlockingHit) // object between barrel and BeamEndPoint
+		{
+			OutBemLocation = WeaponTraceHit.Location;
+		}
+		return true;
+	}
+	return false;
 }
 
 // Called every frame

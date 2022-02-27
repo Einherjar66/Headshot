@@ -53,9 +53,17 @@ private:
 	class USoundCue* FireSound;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Flash spawned at BarrelSocket
 	class UParticleSystem* MuzzelFlash;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Particles spawned upon bullet Impact
+	UParticleSystem* ImpactParticles;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Skome trail for bullets
+	UParticleSystem* BeamParticles;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Montage for firing the weapon
 	class UAnimMontage* HipFire;
 
+	/**
+	 * Functions
+	 */
+	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBemLocation);
 
 	/**
 	 *  Variables
