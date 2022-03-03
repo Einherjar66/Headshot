@@ -21,6 +21,7 @@ public:
 
 	virtual void NativeInitializeAnimation() override;
 
+	
 private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
@@ -37,5 +38,8 @@ private:
 	bool bIsAccelerating;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))	// Offset Yaw used for strafing 
 	float MovementOffsetYaw;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))	// Offset yaw the frame before we stopped moving
+	float LastMovementOffsetYaw;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))	// 
+	bool bAiming;
 };

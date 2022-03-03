@@ -37,15 +37,14 @@ void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime)
 		FRotator AimRotaion = ShooterCharacter->GetBaseAimRotation();										// Returns the Rotator where we are Aiming at
 		FRotator MovementRotaion = UKismetMathLibrary::MakeRotFromX(ShooterCharacter->GetVelocity());
 		MovementOffsetYaw = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotaion, AimRotaion).Yaw;	// Give us the Movement offset Yaw
+		
 
-// 
-//  		FString RotaionMessage = FString::Printf(TEXT("Base Aim Rotaion: %f"), AimRotaion.Yaw);
-// 		FString OffsetMessage = FString::Printf(TEXT("Movement Offset Yaw: %f"), MovementOffsetYaw);
-// 
-// 		if (GEngine)
-// 		{
-// 			GEngine->AddOnScreenDebugMessage(1, 0.f, FColor::White, OffsetMessage);
-// 		}
+		if (ShooterCharacter->GetVelocity().Size() > 0.f)
+		{
+			LastMovementOffsetYaw = MovementOffsetYaw;														// LastMovementOffsetYaw saves the last moment before the player comes to a standstill
+		}
+
+		bAiming = ShooterCharacter->GetAiming();
 
 	}
 }

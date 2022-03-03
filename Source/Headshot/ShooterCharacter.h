@@ -15,9 +15,9 @@ public:
 	// Sets default values for this character's properties
 	AShooterCharacter();
 
-
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 protected:
@@ -26,7 +26,10 @@ protected:
 
 	void MoveForward(float Value);	// Called for Forward / backward input
 	void MoveRight(float Value);	// Called for side to side input
-	
+	void FireWeapon();				// Called when fire Button is pressed
+	void AimingButtonPressed();		// SetbAmin to true
+	void AimingButtonReleased();	// Set bAiming to false
+
 	/**
 	 * Called via input to turn at a given rate
 	 * @param Rate This is a normalized rate i.e. 1.0 means 100% of desired turn rate
@@ -39,7 +42,6 @@ protected:
 	 */
 	void LooUpAtRate(float Rate);
 
-	void FireWeapon();				// Called when fire Button is pressed
 private:
 
 	/**
@@ -64,7 +66,10 @@ private:
 	 * Functions
 	 */
 	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBemLocation);
+	void CameraZoomIn(float DeltaTime);
 
+
+																				
 	/**
 	 *  Variables
 	 */
@@ -72,10 +77,20 @@ private:
 	float BaseTurnRate;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))	// Base look up/down rate, in deg/sec. Other scaling may affect final turn rate
 	float BaseLookUpRate;
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category = "Combat", meta = (AllowPrivateAccess = "true"))		// true when aiming
+	bool bAiming;																								
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Interp speed for zooming when aiming
+	float ZoomInterpSpeed;
+
+
+	float CameraDefaultFOV;							// Default  camera field of view
+	float CameraZoomedFOV;							// Field of view value for when zoomed in	
+	float CameraCurrentFOV;							// Current field of view this frame
+	
 
 public:
 
 	FORCEINLINE USpringArmComponent* GetSpringArmComponent() const { return SpringArmComponent; }				// Returns USpringArmComponent subobject
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }								// Returns FollowCamera subobject
-
+	FORCEINLINE bool GetAiming()const { return bAiming; }
 };
