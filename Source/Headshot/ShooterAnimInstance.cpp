@@ -41,7 +41,7 @@ void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime)
 
 		if (ShooterCharacter->GetVelocity().Size() > 0.f)
 		{
-			LastMovementOffsetYaw = MovementOffsetYaw;														// LastMovementOffsetYaw saves the last moment before the player comes to a standstill
+			LastMovementOffsetYaw = MovementOffsetYaw;				// LastMovementOffsetYaw saves the last moment before the player comes to a standstill
 		}
 
 		bAiming = ShooterCharacter->GetAiming();
@@ -53,5 +53,5 @@ void UShooterAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
 
-	ShooterCharacter = Cast<AShooterCharacter>(TryGetPawnOwner());								// Gibt uns die AnimInstance vom Pawn
+	ShooterCharacter = Cast<AShooterCharacter>(TryGetPawnOwner());	// Gibt uns die AnimInstance vom Pawn
 }

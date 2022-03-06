@@ -16,8 +16,8 @@
 #include "DrawDebugHelpers.h"
 
 // Sets default values
-AShooterCharacter::AShooterCharacter() : 
-	
+AShooterCharacter::AShooterCharacter() :
+
 	// Base rate for turning/look up 
 	BaseTurnRate(45.f),
 	BaseLookUpRate(45.f),
@@ -29,19 +29,32 @@ AShooterCharacter::AShooterCharacter() :
 	AimingLookUpRate(20.f),
 
 	// Mouse look sensitivity scale factors
+	MouseHipTurnRate(1.f), 
 	MouseHipLookUpRate(1.f),
-	MouseHipTurnRate(1.f),
+	MouseAimingTurnRate(.2f), 
 	MouseAimingLookUpRate(.2f),
-	MouseAimingTurnRate(.2f),
+	
 
 	// True when aiming the weapon
 	bAiming(false),
 
 	// camera field of view values
 	ZoomInterpSpeed(15.f),
-	CameraZoomedFOV(45.f),
 	CameraDefaultFOV(0.f),
-	CameraCurrentFOV(0.f)
+	CameraZoomedFOV(45.f),
+	CameraCurrentFOV(0.f),
+
+	// Crosshair spread factors
+	CrosshairSpreadMultiplier(0.f),
+	CrosshairVelocityFactor(0.f),
+	CrosshairInAirFactor(0.f),
+	CrosshairAimFactor(0.f),
+	CrosshairShootingFactor(0.f),
+	
+	// Bullet fire timer variables
+	ShootTimeDuration(0.05f),
+	bFiringBullet(false)
+
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -151,6 +164,64 @@ void AShooterCharacter::LookUp(float Value)
 	AddControllerPitchInput(Value * LookUpScaleRate);
 }
 
+void AShooterCharacter::CalculateCrosshairSpread(float DeltaTime)
+{
+	FVector2D WalkSpeedRange{ 0.f,600.f };
+	FVector2D VelocityMultiplierRange{ 0.f,1.0f };
+	FVector Velocity{ GetVelocity() };
+	Velocity.Z = 0.f;
+
+	CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(WalkSpeedRange, VelocityMultiplierRange, Velocity.Size());
+
+	// Calculate crosshair in air factor
+	if (GetCharacterMovement()->IsFalling()) // is in air
+	{
+		CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, 2.25f, DeltaTime, 2.25f);		// Spread the crosshair slowly while in air
+		
+	}
+	else //Character is on the ground
+	{
+		CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, .0f, DeltaTime, 30.f);		// Shrink the crosshairs rapidly while on the ground
+	}
+
+
+	// Calculate crosshair aim factor
+	if (bAiming)	// Aiming
+	{
+		CrosshairAimFactor = FMath::FInterpTo(CrosshairAimFactor, 0.2f, DeltaTime, 30.f);			// Shrink the crosshair while Aiming
+	}
+ 	else			// Not Aiming
+ 	{
+ 		CrosshairAimFactor = FMath::FInterpTo(CrosshairAimFactor, .0f, DeltaTime, 30.f);			// Spread the crosshair to normal while not Aiming
+ 
+ 	}
+
+
+	// true 0.05 sec after firing
+	if (bFiringBullet)
+	{
+		CrosshairShootingFactor = FMath::FInterpTo(CrosshairShootingFactor, 0.3f, DeltaTime, 60.f);
+	} 
+	else
+	{
+		CrosshairShootingFactor = FMath::FInterpTo(CrosshairShootingFactor, 0.f, DeltaTime, 60.f);
+	}
+
+	CrosshairSpreadMultiplier = 0.5f + CrosshairVelocityFactor + CrosshairInAirFactor - CrosshairAimFactor + CrosshairShootingFactor;
+}
+
+void AShooterCharacter::StartCrosshairBulletFire()
+{
+	bFiringBullet = true;
+
+	GetWorldTimerManager().SetTimer(CrosshairShootTimer, this, &AShooterCharacter::FinishCrosshairBulletFire, ShootTimeDuration);
+}
+
+void AShooterCharacter::FinishCrosshairBulletFire()
+{
+	bFiringBullet = false;
+}
+
 void AShooterCharacter::FireWeapon()
 {
 
@@ -195,6 +266,8 @@ void AShooterCharacter::FireWeapon()
 		AnimInstance->Montage_JumpToSection(FName("StartFire"));
 	}
 
+	// Start bullet fire timer for crosshairs
+	StartCrosshairBulletFire();
 }
 
 void AShooterCharacter::AimingButtonPressed()
@@ -222,7 +295,6 @@ bool AShooterCharacter::GetBeamEndLocation(const FVector& MuzzleSocketLocation, 
 
 	// Get Screen space location of crosshairs
 	FVector2D CrosshairLocation(ViewportSize.X / 2, ViewportSize.Y / 2);	// Get the middle of Viewport
-	CrosshairLocation.Y -= 50.f;
 	FVector CrosshairWoldPosition;
 	FVector CrosshairWorldDirection;
 
@@ -297,6 +369,11 @@ void AShooterCharacter::SetLookUpRates()
 	}
 }
 
+float AShooterCharacter::GetCrosshairSpreadMultiplier() const
+{
+	return CrosshairSpreadMultiplier;
+}
+
 // Called every frame
 void AShooterCharacter::Tick(float DeltaTime)
 {
@@ -307,6 +384,9 @@ void AShooterCharacter::Tick(float DeltaTime)
 
 	// Change look sensitivity based on aiming
 	SetLookUpRates();
+
+	// Calculate crosshair spread multiplier
+	CalculateCrosshairSpread(DeltaTime);
 }
 
 // Called to bind functionality to input
