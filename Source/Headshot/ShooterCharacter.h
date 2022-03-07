@@ -24,11 +24,25 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	void MoveForward(float Value);	// Called for Forward / backward input
-	void MoveRight(float Value);	// Called for side to side input
-	void FireWeapon();				// Called when fire Button is pressed
-	void AimingButtonPressed();		// SetbAmin to true
-	void AimingButtonReleased();	// Set bAiming to false
+	void MoveForward(float Value);			// Called for Forward / backward input
+	void MoveRight(float Value);			// Called for side to side input
+	void FireWeapon();						// Called when fire Button is pressed
+	void AimingButtonPressed();				// SetbAmin to true
+	void AimingButtonReleased();			// Set bAiming to false
+	void CalculateCrosshairSpread(float DeltaTime);
+	void StartCrosshairBulletFire();
+	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBemLocation);
+	void CameraZoomIn(float DeltaTime);
+	void SetLookUpRates();					//Set BaseTurnRate an BaseLookUpRate based on Aiming
+	void FireButtonPressed();
+	void FireButtonReleased();
+	void StartFireTimer();
+
+	UFUNCTION()
+	void AutoFireReset();
+	UFUNCTION()
+	void FinishCrosshairBulletFire();
+
 
 	/**
 	 * Called via input to turn at a given rate
@@ -54,12 +68,6 @@ protected:
 	 */
 	void LookUp(float Value);
 
-	void CalculateCrosshairSpread(float DeltaTime);
-	void StartCrosshairBulletFire();
-
-	UFUNCTION()
-	void FinishCrosshairBulletFire();
-
 private:
 
 	/**
@@ -75,7 +83,7 @@ private:
 	class UParticleSystem* MuzzelFlash;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Particles spawned upon bullet Impact
 	UParticleSystem* ImpactParticles;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Somke trail for bullets
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Smoke trail for bullets
 	UParticleSystem* BeamParticles;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Montage for firing the weapon
 	class UAnimMontage* HipFire;
@@ -83,9 +91,7 @@ private:
 	/**
 	 * Functions
 	 */
-	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBemLocation);
-	void CameraZoomIn(float DeltaTime);
-	void SetLookUpRates();	//Set BaseTurnRate an BaseLookUpRate based on Aiming
+
 
 																				
 	/**
@@ -134,13 +140,19 @@ private:
 
 
 
-	float CameraDefaultFOV;							// Default  camera field of view
-	float CameraZoomedFOV;							// Field of view value for when zoomed in	
-	float CameraCurrentFOV;							// Current field of view this frame
+	float CameraDefaultFOV;					// Default  camera field of view
+	float CameraZoomedFOV;					// Field of view value for when zoomed in	
+	float CameraCurrentFOV;					// Current field of view this frame
 
 	float ShootTimeDuration;
 	bool bFiringBullet;
 	FTimerHandle CrosshairShootTimer;
+
+	bool bFireButtonPressed;				// Left mouse button or right console trigger pressed 
+	bool bShouldFire;						// True when we can fire. False when waiting for the timer
+	float AutomaticFireRate;				// Rate of automatic gun fire
+	FTimerHandle AutoFireTimer;				// Sets a timer between gunshots
+
 
 public:
 
