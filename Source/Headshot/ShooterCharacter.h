@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "ShooterCharacter.generated.h"
 
+class AWeapon;
+
 UCLASS()
 class HEADSHOT_API AShooterCharacter : public ACharacter
 {
@@ -20,23 +22,33 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	void MoveForward(float Value);			// Called for Forward / backward input
-	void MoveRight(float Value);			// Called for side to side input
-	void FireWeapon();						// Called when fire Button is pressed
-	void AimingButtonPressed();				// SetbAmin to true
-	void AimingButtonReleased();			// Set bAiming to false
+	void MoveForward(float Value);				// Called for Forward / backward input
+	void MoveRight(float Value);				// Called for side to side input
+	void FireWeapon();							// Called when fire Button is pressed
+	void AimingButtonPressed();					// SetbAmin to true
+	void AimingButtonReleased();				// Set bAiming to false
+	void SetLookUpRates();						// Set BaseTurnRate an BaseLookUpRate based on Aiming
+	void TraceForItems();						// Trace for Item if OverlappedItemCount >0
+	AWeapon* SpawnDefaultWeapon();				// Spawns a default weapon and equips it
+	void EquipWeapon(AWeapon* WeaponToEquip);	// Takes a weapon an attaches it to the mesh
+	void DropWeapon();							// Detach weapon and let it fall to the ground
+	void FireButtonPressed();
+	bool TraceUnderCrosshairs(FHitResult& OutHitResult, FVector OutHitLacation);	// Line trace for items under the crosshairs
+
+	void FireButtonReleased();
+	void StartFireTimer();
 	void CalculateCrosshairSpread(float DeltaTime);
 	void StartCrosshairBulletFire();
 	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBemLocation);
 	void CameraZoomIn(float DeltaTime);
-	void SetLookUpRates();					//Set BaseTurnRate an BaseLookUpRate based on Aiming
-	void FireButtonPressed();
-	void FireButtonReleased();
-	void StartFireTimer();
+
+	void SelectButtonPressed();
+	void SelectButtonReleased();
 
 	UFUNCTION()
 	void AutoFireReset();
@@ -87,13 +99,14 @@ private:
 	UParticleSystem* BeamParticles;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Montage for firing the weapon
 	class UAnimMontage* HipFire;
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Currently equipped Weapon
+	AWeapon* EquippedWeapon;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))		// The AItem we hit last frame
+	class AItem* TraceHitItemLastFrame;
 
-	/**
-	 * Functions
-	 */
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))	// Set this in Blueprints for the default Weapon class
+	TSubclassOf<AWeapon> DefaultWeaponClass;
 
-
-																				
 	/**
 	 *  Variables
 	 */
@@ -140,7 +153,7 @@ private:
 
 
 
-	float CameraDefaultFOV;					// Default  camera field of view
+	float CameraDefaultFOV;					// Default camera field of view
 	float CameraZoomedFOV;					// Field of view value for when zoomed in	
 	float CameraCurrentFOV;					// Current field of view this frame
 
@@ -153,13 +166,19 @@ private:
 	float AutomaticFireRate;				// Rate of automatic gun fire
 	FTimerHandle AutoFireTimer;				// Sets a timer between gunshots
 
+	bool bShouldTraceForItems;				// True if we should trace every frame for items
+	int8 OverlappedItemCount;				// Number of overlapped AItems
 
+	
 public:
 
 	FORCEINLINE USpringArmComponent* GetSpringArmComponent() const { return SpringArmComponent; }				// Returns USpringArmComponent subobject
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }								// Returns FollowCamera subobject
 	FORCEINLINE bool GetAiming()const { return bAiming; }
+	FORCEINLINE int8 GetOverlappedItemCount() const { return OverlappedItemCount; }
 
 	UFUNCTION(BlueprintCallable)
 	float GetCrosshairSpreadMultiplier() const;
+	
+	void IncrementOverlappedItemCount(int8 Amount);			// Adds/ subtracts to/from OverlappedItemCount and updates bShouldTraceForItems
 };
