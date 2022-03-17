@@ -37,6 +37,7 @@ protected:
 	AWeapon* SpawnDefaultWeapon();				// Spawns a default weapon and equips it
 	void EquipWeapon(AWeapon* WeaponToEquip);	// Takes a weapon an attaches it to the mesh
 	void DropWeapon();							// Detach weapon and let it fall to the ground
+	void SwapWeapon(AWeapon* WeaponToSwap);		// Drops currently equipped Weapon and Equips TraceHitItem 
 	void FireButtonPressed();
 	bool TraceUnderCrosshairs(FHitResult& OutHitResult, FVector OutHitLacation);	// Line trace for items under the crosshairs
 
@@ -103,7 +104,8 @@ private:
 	AWeapon* EquippedWeapon;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))		// The AItem we hit last frame
 	class AItem* TraceHitItemLastFrame;
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))	// The item currently hit by our trace in TraceForItems (could be null)
+	AItem* TraceHitItem;
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))	// Set this in Blueprints for the default Weapon class
 	TSubclassOf<AWeapon> DefaultWeaponClass;
 

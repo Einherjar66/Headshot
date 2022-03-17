@@ -13,5 +13,20 @@ UCLASS()
 class HEADSHOT_API AWeapon : public AItem
 {
 	GENERATED_BODY()
-	
+
+public:
+	AWeapon();
+
+	virtual void Tick(float DeltaTime) override;
+
+	void ThrowWeapon();	// Add a Impulse to the weapon
+protected:
+
+	void StopFalling();
+
+private:
+	FTimerHandle ThrowWeaponTimer;
+	float ThrowWeaponTime;
+	bool bFalling;
+
 };

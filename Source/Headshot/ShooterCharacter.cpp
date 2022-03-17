@@ -110,6 +110,24 @@ void AShooterCharacter::BeginPlay()
 	EquipWeapon(SpawnDefaultWeapon());
 }
 
+// Called every frame
+void AShooterCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// Handle interpolation for zoom when aiming
+	CameraZoomIn(DeltaTime);
+
+	// Change look sensitivity based on aiming
+	SetLookUpRates();
+
+	// Calculate crosshair spread multiplier
+	CalculateCrosshairSpread(DeltaTime);
+
+	// Check OverlappingItemCount, then trace for items
+	TraceForItems();
+}
+
 void AShooterCharacter::MoveForward(float Value)						// Value, ist mit dem input wert der in der UE hinterlegt ist gebunden. (Das ist die 1.0 im input Fenster)
 {
 
@@ -350,7 +368,11 @@ void AShooterCharacter::CameraZoomIn(float DeltaTime)
 
 void AShooterCharacter::SelectButtonPressed()
 {
-	DropWeapon();
+	if (TraceHitItem)
+	{
+		AWeapon* TraceHitWeapon = Cast<AWeapon>(TraceHitItem);
+		SwapWeapon(TraceHitWeapon);
+	}
 }
 
 void AShooterCharacter::SelectButtonReleased()
@@ -402,19 +424,18 @@ void AShooterCharacter::TraceForItems()
 		TraceUnderCrosshairs(ItemTraceResult, HitLocation);
 		if (ItemTraceResult.bBlockingHit)
 		{
-			AItem* HitItem = Cast<AItem>(ItemTraceResult.Actor);
-			
-			if (HitItem && HitItem->GetPickupWidget())
+			TraceHitItem = Cast<AItem>(ItemTraceResult.Actor);
+			if (TraceHitItem && TraceHitItem->GetPickupWidget())
 			{
 				
 				// Show Item's Pickup widget
-				HitItem->GetPickupWidget()->SetVisibility(true);
+				TraceHitItem->GetPickupWidget()->SetVisibility(true);
 			}
 
 			// We hit an AItem last frame
 			if (TraceHitItemLastFrame)
 			{
-				if (HitItem != TraceHitItemLastFrame)
+				if (TraceHitItem != TraceHitItemLastFrame)
 				{
 					// We are hitting a different AItem this frame from last frame. Or AItem is null
 					TraceHitItemLastFrame->GetPickupWidget()->SetVisibility(false);
@@ -422,7 +443,7 @@ void AShooterCharacter::TraceForItems()
 			}
 
 			// store a reference to HitItem for next frame
-			TraceHitItemLastFrame = HitItem;
+			TraceHitItemLastFrame = TraceHitItem;
 		}
 	}
 
@@ -510,7 +531,16 @@ void AShooterCharacter::DropWeapon()
 		EquippedWeapon->GetItemMesh()->DetachFromComponent(DetachmentTranformRules);
 
 		EquippedWeapon->SetItemState(EItemState::EIS_Falling);
+		EquippedWeapon->ThrowWeapon();
 	}
+}
+
+void AShooterCharacter::SwapWeapon(AWeapon* WeaponToSwap)
+{
+	DropWeapon();				// Drop the current weapon
+	EquipWeapon(WeaponToSwap);	// Take the new one
+	TraceHitItem = nullptr;
+	TraceHitItemLastFrame = nullptr;
 }
 
 void AShooterCharacter::AutoFireReset()
@@ -542,23 +572,7 @@ void AShooterCharacter::IncrementOverlappedItemCount(int8 Amount)
 	}
 }
 
-// Called every frame
-void AShooterCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 
-	// Handle interpolation for zoom when aiming
-	CameraZoomIn(DeltaTime);
-
-	// Change look sensitivity based on aiming
-	SetLookUpRates();
-
-	// Calculate crosshair spread multiplier
-	CalculateCrosshairSpread(DeltaTime);
-
-	// Check OverlappingItemCount, then trace for items
-	TraceForItems();
-}
 
 // Called to bind functionality to input
 void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
