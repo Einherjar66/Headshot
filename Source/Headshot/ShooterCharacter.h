@@ -34,12 +34,13 @@ protected:
 	void AimingButtonReleased();				// Set bAiming to false
 	void SetLookUpRates();						// Set BaseTurnRate an BaseLookUpRate based on Aiming
 	void TraceForItems();						// Trace for Item if OverlappedItemCount >0
-	AWeapon* SpawnDefaultWeapon();				// Spawns a default weapon and equips it
 	void EquipWeapon(AWeapon* WeaponToEquip);	// Takes a weapon an attaches it to the mesh
 	void DropWeapon();							// Detach weapon and let it fall to the ground
 	void SwapWeapon(AWeapon* WeaponToSwap);		// Drops currently equipped Weapon and Equips TraceHitItem 
 	void FireButtonPressed();
 	bool TraceUnderCrosshairs(FHitResult& OutHitResult, FVector OutHitLacation);	// Line trace for items under the crosshairs
+
+	AWeapon* SpawnDefaultWeapon();				// Spawns a default weapon and equips it
 
 	void FireButtonReleased();
 	void StartFireTimer();
@@ -47,6 +48,7 @@ protected:
 	void StartCrosshairBulletFire();
 	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBemLocation);
 	void CameraZoomIn(float DeltaTime);
+
 
 	void SelectButtonPressed();
 	void SelectButtonReleased();
@@ -152,8 +154,10 @@ private:
 	float CrosshairAimFactor;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Crosshairs", meta = (AllowPrivateAccess = "true"))	// Shooting component for crosshairs spread
 	float CrosshairShootingFactor;
-
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))			// Distance outward from the camera for the interp destination
+	float CameraInterpDistance;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))			// Distance upward from the camera for the interp destination
+	float CameraIterpElevation;
 
 	float CameraDefaultFOV;					// Default camera field of view
 	float CameraZoomedFOV;					// Field of view value for when zoomed in	
@@ -171,7 +175,7 @@ private:
 	bool bShouldTraceForItems;				// True if we should trace every frame for items
 	int8 OverlappedItemCount;				// Number of overlapped AItems
 
-	
+
 public:
 
 	FORCEINLINE USpringArmComponent* GetSpringArmComponent() const { return SpringArmComponent; }				// Returns USpringArmComponent subobject
@@ -183,4 +187,7 @@ public:
 	float GetCrosshairSpreadMultiplier() const;
 	
 	void IncrementOverlappedItemCount(int8 Amount);			// Adds/ subtracts to/from OverlappedItemCount and updates bShouldTraceForItems
+	void GetPickupItem(AItem* Item);
+
+	FVector GetCameraInterpLocation();
 };

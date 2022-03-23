@@ -10,11 +10,17 @@
 #include "ShooterCharacter.h"
 
 // Sets default values
-AItem::AItem() : 
+AItem::AItem() :
 	ItemName(FString("Default")),
 	ItemCount(0),
 	ItemRartiy(EItemRarity::EIR_Common),
-	ItemState(EItemState::EIS_Pickup)
+	ItemState(EItemState::EIS_Pickup),
+
+	// Item interp variables
+	ItemInterpStartLocation(FVector(0.f)),
+	CameraTargetLocation(FVector(0.f)),
+	ZCurveTime(.7f),
+	bInterping(false)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -152,7 +158,23 @@ void AItem::SetItemProperties(EItemState State)
 
 		break;
 	case EItemState::EIS_EquipInterping:
-		
+
+		PickupWidget->SetVisibility(false);
+		// Set mesh properties
+		ItemMesh->SetSimulatePhysics(false);
+		ItemMesh->SetEnableGravity(false);
+		ItemMesh->SetVisibility(true);
+		ItemMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
+		ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		// Set AreaSphere properties
+		AreaSphere->SetCollisionResponseToChannels(ECollisionResponse::ECR_Ignore);
+		AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		// Set CollisionBox properties
+		CollisionBox->SetCollisionResponseToChannels(ECollisionResponse::ECR_Ignore);
+		CollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 		break;
 	case EItemState::EIS_Pickedup:
 		
@@ -202,10 +224,60 @@ void AItem::SetItemProperties(EItemState State)
 	}
 }
 
+void AItem::FinishIterping()
+{
+	bInterping = false;
+	if (Character)
+	{
+		Character->GetPickupItem(this);
+	}
+}
+
+void AItem::ItemInterp(float DealtaTime)
+{
+	if (!bInterping) return;
+
+	if (Character && ItemZCurve)
+	{
+		// Elapsed time since we started InterpTimer
+		const float ElapsedTime = GetWorldTimerManager().GetTimerElapsed(ItemInterpTimer);
+		// Get curve value corresponding to ElapsedTime
+		const float CurveValue = ItemZCurve->GetFloatValue(ElapsedTime);
+
+		// Get the item's initial location when the curve started
+		FVector ItemLocation = ItemInterpStartLocation;
+		// Get location in front of the camera
+		const FVector CameraInterpLocation{ Character->GetCameraInterpLocation() };
+
+		// Vector from the Item to camera interp location, X and Y are zeroed out 
+		const FVector ItemToCamera{ 0.f,0.f,(CameraInterpLocation - ItemLocation).Z };
+		// Scale factor to multiply  CureValue;
+		const float DeltaZ = ItemToCamera.Size();
+
+		// Adding curve value to the Z component of the Initial Location (scaled by Delta)
+		ItemLocation.Z += CurveValue * DeltaZ;
+		SetActorLocation(ItemLocation, true, nullptr, ETeleportType::TeleportPhysics);
+	}
+
+}
+
 void AItem::SetItemState(EItemState State)
 {
 	ItemState = State;
 	SetItemProperties(State);
+}
+
+void AItem::StartItemCurve(AShooterCharacter* Char)
+{
+	// store a handle to Character
+	Character = Char; 
+
+	// Store initial location of the Item
+	ItemInterpStartLocation = GetActorLocation();
+	bInterping = true;
+	SetItemState(EItemState::EIS_EquipInterping);
+
+	GetWorldTimerManager().SetTimer(ItemInterpTimer, this, &AItem::FinishIterping, ZCurveTime);
 }
 
 // Called every frame
@@ -213,5 +285,7 @@ void AItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// Handles item interpolation when in the EquipInterping state 
+	ItemInterp(DeltaTime);
 }
 
