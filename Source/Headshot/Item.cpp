@@ -6,6 +6,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Camera/CameraComponent.h"
 
 #include "ShooterCharacter.h"
 
@@ -22,7 +23,8 @@ AItem::AItem() :
 	bInterping(false),
 	ZCurveTime(.7f),
 	ItemInterpX(0.f),
-	ItemInterpY(0.f)
+	ItemInterpY(0.f),
+	InterpInitialYawOffset(0.f)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -233,6 +235,9 @@ void AItem::FinishIterping()
 	{
 		Character->GetPickupItem(this);
 	}
+
+	// Set Scale back to normal
+	SetActorScale3D(FVector(1.f));
 }
 
 void AItem::ItemInterp(float DealtaTime)
@@ -269,8 +274,22 @@ void AItem::ItemInterp(float DealtaTime)
 		// Adding curve value to the Z component of the Initial Location (scaled by Delta)
 		ItemLocation.Z += CurveValue * DeltaZ;
 		SetActorLocation(ItemLocation, true, nullptr, ETeleportType::TeleportPhysics);
-	}
 
+		// Camera rotation this frame
+		const FRotator CameraRotation{ Character->GetFollowCamera()->GetComponentRotation() };
+		// Camera rotation plus inital Yaw offset
+		FRotator ItemRotation{ 0.f, CameraRotation.Yaw + InterpInitialYawOffset ,0.f };
+		SetActorRotation(ItemRotation, ETeleportType::TeleportPhysics);
+
+
+		if (ItemScaleCurve)
+		{
+			const float ScaleCurveValue = ItemScaleCurve->GetFloatValue(ElapsedTime);
+
+			// Scale the Item in the X Y Z
+			SetActorScale3D(FVector(ScaleCurveValue, ScaleCurveValue, ScaleCurveValue));
+		}
+	}
 }
 
 void AItem::SetItemState(EItemState State)
@@ -290,6 +309,14 @@ void AItem::StartItemCurve(AShooterCharacter* Char)
 	SetItemState(EItemState::EIS_EquipInterping);
 
 	GetWorldTimerManager().SetTimer(ItemInterpTimer, this, &AItem::FinishIterping, ZCurveTime);
+
+	// Get initial Yaw of the Camera
+	const float CameraRotationYaw{ Character->GetFollowCamera()->GetComponentRotation().Yaw };
+	// Get initial Yaw of the Item
+	const float ItemRotaionYaw{ GetActorRotation().Yaw };
+
+	// Initial Yaw offset between Camera and Item
+	InterpInitialYawOffset =  ItemRotaionYaw - CameraRotationYaw;
 }
 
 // Called every frame

@@ -79,6 +79,8 @@ private:
 	class USphereComponent* AreaSphere;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))	// The curve asset to use for  the item's Z location when interping
 	class UCurveFloat* ItemZCurve;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))	// curve used to scale the item when interping
+	UCurveFloat* ItemScaleCurve;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))	// pointer to the Character
 	class AShooterCharacter* Character;
 
@@ -117,6 +119,9 @@ private:
 	// X and Y for the Item while interping in the EquipInterping state
 	float ItemInterpX;	
 	float ItemInterpY;
+
+	// Initial Yaw offset between the camera and the interping item
+	float InterpInitialYawOffset;
 public:
 
 	FORCEINLINE UWidgetComponent* GetPickupWidget() const { return PickupWidget; }
