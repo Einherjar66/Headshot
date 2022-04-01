@@ -8,6 +8,25 @@
 
 class AWeapon;
 
+UENUM(BlueprintType)
+enum class ECombatState : uint8
+{
+	ECS_Unoccupied			UMETA(DisplayName = "Unoccupied"),
+	ECS_FireTimerInPorgess	UMETA(DisplayName = "FireTimerInPorgess"),
+	ECS_Reloading			UMETA(DisplayName = "Reloading"),
+
+	ECS_MAX					UMETA(DisplayName = "DefaultMAX")
+};
+
+UENUM(BlueprintType)
+enum class EAmmoType : uint8
+{
+	EAT_9mm		UMETA(DisplayName = "9mm"),
+	EAT_AR		UMETA(DisplayName = "AssaultRifle"),
+
+	EAT_MAX		UMETA(DisplayName = "DefaultMAX")
+};
+
 UCLASS()
 class HEADSHOT_API AShooterCharacter : public ACharacter
 {
@@ -37,6 +56,7 @@ protected:
 	void EquipWeapon(AWeapon* WeaponToEquip);	// Takes a weapon an attaches it to the mesh
 	void DropWeapon();							// Detach weapon and let it fall to the ground
 	void SwapWeapon(AWeapon* WeaponToSwap);		// Drops currently equipped Weapon and Equips TraceHitItem 
+	void InitializeAmmoMap();					// Init the Ammo Map with ammo values
 	void FireButtonPressed();
 	bool TraceUnderCrosshairs(FHitResult& OutHitResult, FVector OutHitLacation);	// Line trace for items under the crosshairs
 
@@ -52,6 +72,11 @@ protected:
 
 	void SelectButtonPressed();
 	void SelectButtonReleased();
+
+	void PlayFireSound();
+	void SendBullet();
+	void PlayGunfireMontage();
+
 
 	UFUNCTION()
 	void AutoFireReset();
@@ -82,6 +107,11 @@ protected:
 	 * @param Value		The input value from mouse movement
 	 */
 	void LookUp(float Value);
+
+	/**
+	 * Check to make sure our wepon has ammo
+	 */
+	bool WeaponHasAmmo();
 
 private:
 
@@ -158,7 +188,15 @@ private:
 	float CameraInterpDistance;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))			// Distance upward from the camera for the interp destination
 	float CameraIterpElevation;
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))			// Map to keep track of ammo of the different ammo types
+	TMap<EAmmoType, int32> AmmoMap;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items", meta = (AllowPrivateAccess = "true"))			// Stating amount of 9mm ammo 
+	int32 Starting9mmAmmo;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items", meta = (AllowPrivateAccess = "true"))			// Stating amount of AR ammo
+	int32 StartingARAmmo;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))			// Combat state, can only fire or reload if Unoccupied
+	ECombatState CombatState;
+	
 	float CameraDefaultFOV;					// Default camera field of view
 	float CameraZoomedFOV;					// Field of view value for when zoomed in	
 	float CameraCurrentFOV;					// Current field of view this frame

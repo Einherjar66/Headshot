@@ -19,7 +19,6 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
-	void ThrowWeapon();	// Add a Impulse to the weapon
 protected:
 
 	void StopFalling();
@@ -29,4 +28,13 @@ private:
 	float ThrowWeaponTime;
 	bool bFalling;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Properties", meta = (AllowPrivateAccess = "true"))		// Ammo cout for this Weapon
+	int32 Ammo;
+
+public:
+
+	void ThrowWeapon();			// Add a Impulse to the weapon
+	void DecrementAmmo();		// Called from Character class when firing weapon
+
+	FORCEINLINE int32 GetAmmo() const { return Ammo; }
 };
