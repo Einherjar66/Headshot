@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "AmmoType.h"
 #include "ShooterCharacter.generated.h"
 
 class AWeapon;
@@ -17,16 +18,6 @@ enum class ECombatState : uint8
 
 	ECS_MAX					UMETA(DisplayName = "DefaultMAX")
 };
-
-UENUM(BlueprintType)
-enum class EAmmoType : uint8
-{
-	EAT_9mm		UMETA(DisplayName = "9mm"),
-	EAT_AR		UMETA(DisplayName = "AssaultRifle"),
-
-	EAT_MAX		UMETA(DisplayName = "DefaultMAX")
-};
-
 UCLASS()
 class HEADSHOT_API AShooterCharacter : public ACharacter
 {
@@ -69,7 +60,6 @@ protected:
 	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBemLocation);
 	void CameraZoomIn(float DeltaTime);
 
-
 	void SelectButtonPressed();
 	void SelectButtonReleased();
 
@@ -77,12 +67,28 @@ protected:
 	void SendBullet();
 	void PlayGunfireMontage();
 
+	void ReloadButtonPressed();
+	void ReloadWeapon();		// Handle reloading of the weapon
+	bool CarryingAmmo();		// Checks to see if we have ammo of the EquippedWeapon's ammo type
+	UFUNCTION(BlueprintCallable)
+	void FinishReload();
 
 	UFUNCTION()
 	void AutoFireReset();
 	UFUNCTION()
 	void FinishCrosshairBulletFire();
 
+	/**
+	 *  Called from Animation Blueprint with Grab Clip notify
+	 */
+	UFUNCTION(BlueprintCallable)
+	void GrabClip();
+
+	/**
+	 *  Called from Animation Blueprint with Release Clip notify
+	 */
+	UFUNCTION(BlueprintCallable)
+	void ReleaseClip();
 
 	/**
 	 * Called via input to turn at a given rate
@@ -109,7 +115,7 @@ protected:
 	void LookUp(float Value);
 
 	/**
-	 * Check to make sure our wepon has ammo
+	 * Check to make sure our weapon has ammo
 	 */
 	bool WeaponHasAmmo();
 
@@ -132,6 +138,8 @@ private:
 	UParticleSystem* BeamParticles;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Montage for firing the weapon
 	class UAnimMontage* HipFire;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Montage for Reload animation
+	UAnimMontage* ReloadMontage;
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Currently equipped Weapon
 	AWeapon* EquippedWeapon;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))		// The AItem we hit last frame
@@ -194,9 +202,13 @@ private:
 	int32 Starting9mmAmmo;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items", meta = (AllowPrivateAccess = "true"))			// Stating amount of AR ammo
 	int32 StartingARAmmo;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))			// Combat state, can only fire or reload if Unoccupied
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Combat state, can only fire or reload if Unoccupied
 	ECombatState CombatState;
-	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Transform of the clip when we first grab the clip during reloading
+	FTransform ClipTransform;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Scene component to attach to the Charater's hand during reloading
+	USceneComponent* HandSceneComponent;
+
 	float CameraDefaultFOV;					// Default camera field of view
 	float CameraZoomedFOV;					// Field of view value for when zoomed in	
 	float CameraCurrentFOV;					// Current field of view this frame
