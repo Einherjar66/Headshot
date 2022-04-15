@@ -7,6 +7,21 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
+
+UShooterAnimInstance::UShooterAnimInstance() : 
+	Speed(0.f),
+	bIsInAir(false),
+	bIsAccelerating(false), 
+	MovementOffsetYaw(0.f),
+	LastMovementOffsetYaw(0.f),
+	bAiming(false),
+	RootYawOffset(0.f), 
+	CharacterYaw(0.f), 
+	CharacterYawLastFrame(0.f)
+{
+
+}
+
 void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime)
 {
 	if (ShooterCharacter == nullptr)															// Wenn der ShooterCharacter null ist.
@@ -45,8 +60,8 @@ void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime)
 		}
 
 		bAiming = ShooterCharacter->GetAiming();
-
 	}
+	TurnInPlace();
 }
 
 void UShooterAnimInstance::NativeInitializeAnimation()
@@ -54,4 +69,21 @@ void UShooterAnimInstance::NativeInitializeAnimation()
 	Super::NativeInitializeAnimation();
 
 	ShooterCharacter = Cast<AShooterCharacter>(TryGetPawnOwner());	// Gibt uns die AnimInstance vom Pawn
+}
+
+void UShooterAnimInstance::TurnInPlace()
+{
+	if (ShooterCharacter == nullptr) return;
+	if (Speed > 0)
+	{
+		// Don't want to turn in place; Character is moving
+	}
+	else
+	{
+		CharacterYawLastFrame = CharacterYaw;
+		CharacterYaw = ShooterCharacter->GetActorRotation().Yaw;
+		const float YawDelta{CharacterYaw - CharacterYawLastFrame}; // gibt uns die frames zwischen CharacterYaw und CharacterYawLastFrame vergagen sind
+
+		RootYawOffset -= YawDelta;
+	}
 }

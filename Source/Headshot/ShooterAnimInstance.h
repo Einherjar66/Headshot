@@ -15,13 +15,14 @@ class HEADSHOT_API UShooterAnimInstance : public UAnimInstance
 	GENERATED_BODY()
 
 public:
-
+	UShooterAnimInstance();
 	UFUNCTION(BlueprintCallable)
 	void UpdateAnimationProperties(float DeltaTime);
 
 	virtual void NativeInitializeAnimation() override;
 
-	
+protected:
+	void  TurnInPlace();	// Handle turning in place variables
 private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
@@ -42,4 +43,9 @@ private:
 	float LastMovementOffsetYaw;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))	// 
 	bool bAiming;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Turn in Place", meta = (AllowPrivateAccess = "true"))
+	float RootYawOffset;
+
+	float CharacterYaw;				// Yaw of the Character this frame
+	float CharacterYawLastFrame;	// Yaw of the Character the previous frame
 };
