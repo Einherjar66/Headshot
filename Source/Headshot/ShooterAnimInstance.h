@@ -45,6 +45,10 @@ private:
 	bool bAiming;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Turn in Place", meta = (AllowPrivateAccess = "true"))
 	float RootYawOffset;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Turn in Place", meta = (AllowPrivateAccess = "true")) // The pitch of the aim rotaiton, used for Aim Offset 
+	float Pitch;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Turn in Place", meta = (AllowPrivateAccess = "true")) // True when reloading, used to prevent Aim Offset while reloading
+	bool bIsReloading;
 
 	float CharacterYaw;				// Yaw of the Character this frame
 	float CharacterYawLastFrame;	// Yaw of the Character the previous frame
