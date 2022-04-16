@@ -48,4 +48,7 @@ private:
 
 	float CharacterYaw;				// Yaw of the Character this frame
 	float CharacterYawLastFrame;	// Yaw of the Character the previous frame
+
+	float RotationCurve;
+	float RotationCurveLastFrame;
 };
