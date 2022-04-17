@@ -55,12 +55,14 @@ private:
 	FName ReloadMontageSection;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Properties", meta = (AllowPrivateAccess = "true"))		// Name for the clip Bone
 	FName ClipBoneName;
+
+
 public:
 
 	void ThrowWeapon();				// Add a Impulse to the weapon
 	void DecrementAmmo();			// Called from Character class when firing weapon
 	void RelaodAmmo(int32 Amount);
-
+	bool ClipIsFull();
 	FORCEINLINE void SetMovingClip(bool Move) { bMovingClip = Move; }
 
 	FORCEINLINE EWeaponType GetWeaponType()		const { return WeaponType; }
