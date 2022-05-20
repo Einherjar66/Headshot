@@ -37,6 +37,7 @@ void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime)
 
 	if (ShooterCharacter)
 	{
+		bCrouching = ShooterCharacter->GetCrouching();
 		bIsReloading = ShooterCharacter->GetCombatState() == ECombatState::ECS_Reloading;
 
 		// Get the lateral speed of the character from velocity
@@ -158,10 +159,4 @@ void UShooterAnimInstance::Lean(float DeltaTime)
 	const float Taget{ Delta.Yaw / DeltaTime };
 	const float Interp{ FMath::FInterpTo(YawDelta,Taget,DeltaTime,6.f) };
 	YawDelta = FMath::Clamp(Interp, -90.f, 90.f);
-
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(2, -1, FColor::Cyan, FString::Printf(TEXT("Yaw delta %f"), Delta.Yaw));
-		//GEngine->AddOnScreenDebugMessage(3, -1, FColor::Cyan, FString::Printf(TEXT("CharacterYaw %f"), CharacterRotation));
-	}
 }

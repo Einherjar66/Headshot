@@ -70,9 +70,11 @@ protected:
 	void ReloadButtonPressed();
 	void ReloadWeapon();		// Handle reloading of the weapon
 	bool CarryingAmmo();		// Checks to see if we have ammo of the EquippedWeapon's ammo type
+	
+	void CrouchButtonPressed();
+
 	UFUNCTION(BlueprintCallable)
 	void FinishReload();
-
 	UFUNCTION()
 	void AutoFireReset();
 	UFUNCTION()
@@ -208,6 +210,8 @@ private:
 	FTransform ClipTransform;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Scene component to attach to the Charater's hand during reloading
 	USceneComponent* HandSceneComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))		// True when Crouching
+	bool bCrouching;
 
 	float CameraDefaultFOV;					// Default camera field of view
 	float CameraZoomedFOV;					// Field of view value for when zoomed in	
@@ -233,6 +237,8 @@ public:
 	FORCEINLINE bool GetAiming()const { return bAiming; }
 	FORCEINLINE int8 GetOverlappedItemCount() const { return OverlappedItemCount; }
 	FORCEINLINE ECombatState GetCombatState() const { return CombatState; }
+	FORCEINLINE bool GetCrouching()const { return bCrouching; }
+
 	UFUNCTION(BlueprintCallable)
 	float GetCrosshairSpreadMultiplier() const;
 	

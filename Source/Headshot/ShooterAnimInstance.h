@@ -62,6 +62,8 @@ private:
 	float YawDelta;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Turn in Place", meta = (AllowPrivateAccess = "true")) // True when reloading, used to prevent Aim Offset while reloading
 	bool bIsReloading;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Crouch", meta = (AllowPrivateAccess = "true"))		// true when Crouching
+	bool bCrouching;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Turn in Place", meta = (AllowPrivateAccess = "true")) // Offset state ; use to detemine which Aim Offset to use
 	EOffsetState OffsetState;
 
