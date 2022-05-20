@@ -32,7 +32,8 @@ public:
 	virtual void NativeInitializeAnimation() override;
 
 protected:
-	void  TurnInPlace();	// Handle turning in place variables
+	void  TurnInPlace();			// Handle turning in place variables
+	void Lean(float DeltaTime);		// Handle Calculation for leaning while running
 private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
@@ -41,29 +42,34 @@ private:
 	/**
 	 * Variables
 	 */
-	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))	// Speed of the Character
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))		// Speed of the Character
 	float Speed;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))	// Whether or not the character is in the air
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))		// Whether or not the character is in the air
 	bool bIsInAir;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))	// Whether or not the character is Moving
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))		// Whether or not the character is Moving
 	bool bIsAccelerating;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))	// Offset Yaw used for strafing 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))		// Offset Yaw used for strafing 
 	float MovementOffsetYaw;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))	// Offset yaw the frame before we stopped moving
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))		// Offset yaw the frame before we stopped moving
 	float LastMovementOffsetYaw;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))	// 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))		// 
 	bool bAiming;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Turn in Place", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Turn in Place", meta = (AllowPrivateAccess = "true")) //
 	float RootYawOffset;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Turn in Place", meta = (AllowPrivateAccess = "true")) // The pitch of the aim rotaiton, used for Aim Offset 
 	float Pitch;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Lean", meta = (AllowPrivateAccess = "true"))			// Yaw delta used for leaning in the running blendspace
+	float YawDelta;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Turn in Place", meta = (AllowPrivateAccess = "true")) // True when reloading, used to prevent Aim Offset while reloading
 	bool bIsReloading;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Turn in Place", meta = (AllowPrivateAccess = "true")) // Offset state ; use to detemine which Aim Offset to use
 	EOffsetState OffsetState;
 
-	float CharacterYaw;				// Yaw of the Character this frame
-	float CharacterYawLastFrame;	// Yaw of the Character the previous frame
+	float TIPCharacterYaw;				// Yaw of the Character this frame; Only updated when standing still and not in air 
+	float TIPCharacterYawLastFrame;		// Yaw of the Character the previous frame; Only updated when standing still and not in air 
+
+	FRotator CharacterRotation;					// Yaw of the Character this frame
+	FRotator CharacterRotationLastFrame;		// Yaw of the Character the previous frame
 
 	float RotationCurve;
 	float RotationCurveLastFrame;
