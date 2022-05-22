@@ -64,6 +64,10 @@ private:
 	bool bIsReloading;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Crouch", meta = (AllowPrivateAccess = "true"))		// true when Crouching
 	bool bCrouching;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Change the recoil weight based on turning in place aiming
+	float RecoilWeight;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// True when tufning in place
+	bool bTurningInPlace;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Turn in Place", meta = (AllowPrivateAccess = "true")) // Offset state ; use to detemine which Aim Offset to use
 	EOffsetState OffsetState;
 
@@ -75,5 +79,6 @@ private:
 
 	float RotationCurve;
 	float RotationCurveLastFrame;
+
 
 };
