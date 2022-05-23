@@ -34,8 +34,10 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
+	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void Jump();
 
 	void MoveForward(float Value);				// Called for Forward / backward input
 	void MoveRight(float Value);				// Called for side to side input
@@ -72,6 +74,7 @@ protected:
 	bool CarryingAmmo();		// Checks to see if we have ammo of the EquippedWeapon's ammo type
 	
 	void CrouchButtonPressed();
+	void InterpCapsuleHalfHeight(float DeltaTime);	// Interps Capsule Half Height when crouching / Standing
 
 	UFUNCTION(BlueprintCallable)
 	void FinishReload();
@@ -212,6 +215,20 @@ private:
 	USceneComponent* HandSceneComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))		// True when Crouching
 	bool bCrouching;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))		// Regaular movement speed
+	float BaseMovementSpeed;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))		// Crouch movement speed
+	float CrouchMovementSpeed;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))			// half height of the capsule when not crouching
+	float StandingCapsuleHalfHeight;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))		// half height of the capsule when crouching
+	float CrouchingCapsuleHalfHeight;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))		// Ground friction while not crouching
+	float BaseGroundFriction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))		// Ground friction while crouching
+	float CrounchingGroundFriction;
+
+	float CurrentCapsuleHalfHeight;		// Current half height of the capsule
 
 	float CameraDefaultFOV;					// Default camera field of view
 	float CameraZoomedFOV;					// Field of view value for when zoomed in	
