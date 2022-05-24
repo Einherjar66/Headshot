@@ -55,6 +55,9 @@ protected:
 
 	AWeapon* SpawnDefaultWeapon();				// Spawns a default weapon and equips it
 
+	void Aim();
+	void StopAiming();
+
 	void FireButtonReleased();
 	void StartFireTimer();
 	void CalculateCrosshairSpread(float DeltaTime);
@@ -227,11 +230,12 @@ private:
 	float BaseGroundFriction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))		// Ground friction while crouching
 	float CrounchingGroundFriction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))		// Default camera field of view 
+	float CameraDefaultFOV;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))		// Field of view value for when zoomed in
+	float CameraZoomedFOV;
 
-	float CurrentCapsuleHalfHeight;		// Current half height of the capsule
-
-	float CameraDefaultFOV;					// Default camera field of view
-	float CameraZoomedFOV;					// Field of view value for when zoomed in	
+	float CurrentCapsuleHalfHeight;			// Current half height of the capsule		
 	float CameraCurrentFOV;					// Current field of view this frame
 
 	float ShootTimeDuration;
@@ -246,7 +250,7 @@ private:
 	bool bShouldTraceForItems;				// True if we should trace every frame for items
 	int8 OverlappedItemCount;				// Number of overlapped AItems
 
-
+	bool bAimingButtonPressed;				// Use for knowing when the aiming button ist pressed
 public:
 
 	FORCEINLINE USpringArmComponent* GetSpringArmComponent() const { return SpringArmComponent; }				// Returns USpringArmComponent subobject

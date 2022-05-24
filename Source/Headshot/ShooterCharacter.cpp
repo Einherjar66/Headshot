@@ -40,8 +40,8 @@ AShooterCharacter::AShooterCharacter() :
 	// Mouse look sensitivity scale factors
 	MouseHipTurnRate(1.f),
 	MouseHipLookUpRate(1.f),
-	MouseAimingTurnRate(.2f),
-	MouseAimingLookUpRate(.2f),
+	MouseAimingTurnRate(.5f),
+	MouseAimingLookUpRate(.5f),
 
 
 	// True when aiming the weapon
@@ -61,7 +61,7 @@ AShooterCharacter::AShooterCharacter() :
 	// camera field of view values
 	ZoomInterpSpeed(15.f),
 	CameraDefaultFOV(0.f),
-	CameraZoomedFOV(45.f),
+	CameraZoomedFOV(30.f),
 	CameraCurrentFOV(0.f),
 
 	// Crosshair spread factors
@@ -87,7 +87,8 @@ AShooterCharacter::AShooterCharacter() :
 	// Camera interp location variables
 	CameraInterpDistance(250.f),
 	CameraIterpElevation(65.f),
-	bCrouching(false)
+	bCrouching(false),
+	bAimingButtonPressed(true)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -97,7 +98,7 @@ AShooterCharacter::AShooterCharacter() :
 	SpringArmComponent->SetupAttachment(GetRootComponent());
 	SpringArmComponent->TargetArmLength = 180.f;
 	SpringArmComponent->bUsePawnControlRotation = true;					// Rotate the arm based on the controller
-	SpringArmComponent->SocketOffset = FVector(0., 50.f, 45.f);
+	SpringArmComponent->SocketOffset = FVector(0., 50.f, 70.f);
 
 	// Create Follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
@@ -341,12 +342,17 @@ void AShooterCharacter::FireWeapon()
 
 void AShooterCharacter::AimingButtonPressed()
 {
-	bAiming = true;
+	bAimingButtonPressed = true;
+	if (CombatState != ECombatState::ECS_Reloading)
+	{
+		Aim();
+	}
 }
 
 void AShooterCharacter::AimingButtonReleased()
 {
-	bAiming = false;
+	bAimingButtonPressed = false;
+	StopAiming();
 }
 
 bool AShooterCharacter::GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBemLocation)
@@ -481,6 +487,11 @@ void AShooterCharacter::ReloadWeapon()
 	// Do we have ammo for the correct type?
 	if (CarryingAmmo() && !EquippedWeapon->ClipIsFull()) 
 	{
+		if (bAiming)
+		{
+			StopAiming();
+		}
+
 		CombatState = ECombatState::ECS_Reloading;
 		UAnimInstance* AnimIntance = GetMesh()->GetAnimInstance();
 		if (AnimIntance && ReloadMontage)
@@ -546,6 +557,12 @@ void AShooterCharacter::FinishReload()
 {
 	// Update the combat state
 	CombatState = ECombatState::ECS_Unoccupied;
+
+	if (bAimingButtonPressed)
+	{
+		Aim();
+	}
+
 	if (EquippedWeapon == nullptr) return;
 
 	const auto AmmoType{ EquippedWeapon->GetAmmoType() };
@@ -693,6 +710,21 @@ AWeapon* AShooterCharacter::SpawnDefaultWeapon()
 		return GetWorld()->SpawnActor<AWeapon>(DefaultWeaponClass);
 	}
 	return nullptr;
+}
+
+void AShooterCharacter::Aim()
+{
+	bAiming = true;
+	GetCharacterMovement()->MaxWalkSpeed = CrouchMovementSpeed;
+}
+
+void AShooterCharacter::StopAiming()
+{
+	bAiming = false;
+	if (!bCrouching)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = BaseMovementSpeed;
+	}
 }
 
 void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
