@@ -57,7 +57,7 @@ protected:
 	void SetActiveStars();
 
 	// Sets properties of the Item's component based on State
-	void SetItemProperties(EItemState State);
+	virtual void SetItemProperties(EItemState State);
 
 	// Called when ItemInterpTimer is finished
 	void FinishIterping();
@@ -83,7 +83,10 @@ private:
 	UCurveFloat* ItemScaleCurve;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))	// pointer to the Character
 	class AShooterCharacter* Character;
-
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))		// Sound played when Item is picked up
+	class USoundCue* PickupSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))		// Sound played when the Item is equipped
+	USoundCue* EquipSound;
 	/**
 	 * Variables
 	 */
@@ -125,11 +128,12 @@ private:
 public:
 
 	FORCEINLINE UWidgetComponent* GetPickupWidget() const { return PickupWidget; }
-	FORCEINLINE USphereComponent* GetAreaSpehere() const { return AreaSphere; }
+	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
 	FORCEINLINE UBoxComponent* GetCollisionBox() const { return CollisionBox; }
 	FORCEINLINE EItemState GetItemState() const { return ItemState; }
 	FORCEINLINE USkeletalMeshComponent* GetItemMesh() const { return ItemMesh; }
-
+	FORCEINLINE USoundCue* GetPickupSound() const { return PickupSound; }
+	FORCEINLINE USoundCue* GetEquipSound() const { return EquipSound; }
 	void SetItemState(EItemState State);
 	void StartItemCurve(AShooterCharacter* Char); // Called from the AShooterCharacter class
 };
