@@ -17,6 +17,7 @@
 #include "Particles/ParticleSystemComponent.h"
 
 #include "Item.h"
+#include "Ammo.h"
 #include "Weapon.h"
 #include "DrawDebugHelpers.h"
 
@@ -553,6 +554,31 @@ void AShooterCharacter::InterpCapsuleHalfHeight(float DeltaTime)
 	GetCapsuleComponent()->SetCapsuleHalfHeight(InterpHalftHeight);
 }
 
+void AShooterCharacter::PickupAmmo(class AAmmo* Ammo)
+{
+	// check to see if AmmoMap contains Ammo's Ammotype
+	if (AmmoMap.Find(Ammo->GetAmmoType()))
+	{
+		// check amount of amm in our AmmoMap for this Ammo Type
+		int32 AmmoCount{ AmmoMap[Ammo->GetAmmoType()] };
+		AmmoCount += Ammo->GetItemCount();
+
+		//Set the amount of ammmo in the Map for this type
+		AmmoMap[Ammo->GetAmmoType()] = AmmoCount;
+	}
+	
+	if (EquippedWeapon->GetAmmoType() == Ammo->GetAmmoType())
+	{
+		// check to see if the gun is empty
+		if (EquippedWeapon->GetAmmo() == 0)
+		{
+			ReloadWeapon();
+		}
+	}
+
+	Ammo->Destroy();
+}
+
 void AShooterCharacter::FinishReload()
 {
 	// Update the combat state
@@ -812,12 +838,23 @@ void AShooterCharacter::IncrementOverlappedItemCount(int8 Amount)
 
 void AShooterCharacter::GetPickupItem(AItem* Item)
 {
-	AWeapon* Weapon = Cast<AWeapon>(Item);
+	if (Item->GetEquipSound())
+	{
+		UGameplayStatics::PlaySound2D(this, Item->GetEquipSound());
+	}
 
+	AWeapon* Weapon = Cast<AWeapon>(Item);
 	if (Weapon)
 	{
 		SwapWeapon(Weapon);
 	}
+
+	AAmmo* Ammo = Cast<AAmmo>(Item);
+	if (Ammo)
+	{
+		PickupAmmo(Ammo);
+	}
+
 }
 
 FVector AShooterCharacter::GetCameraInterpLocation()

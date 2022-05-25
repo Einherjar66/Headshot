@@ -134,6 +134,7 @@ public:
 	FORCEINLINE USkeletalMeshComponent* GetItemMesh() const { return ItemMesh; }
 	FORCEINLINE USoundCue* GetPickupSound() const { return PickupSound; }
 	FORCEINLINE USoundCue* GetEquipSound() const { return EquipSound; }
+	FORCEINLINE int32 GetItemCount() const { return ItemCount; }
 	void SetItemState(EItemState State);
 	void StartItemCurve(AShooterCharacter* Char); // Called from the AShooterCharacter class
 };

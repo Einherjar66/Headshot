@@ -39,6 +39,13 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void Jump();
 
+	UFUNCTION(BlueprintCallable)
+	void FinishReload();
+	UFUNCTION()
+	void AutoFireReset();
+	UFUNCTION()
+	void FinishCrosshairBulletFire();
+
 	void MoveForward(float Value);				// Called for Forward / backward input
 	void MoveRight(float Value);				// Called for side to side input
 	void FireWeapon();							// Called when fire Button is pressed
@@ -79,12 +86,7 @@ protected:
 	void CrouchButtonPressed();
 	void InterpCapsuleHalfHeight(float DeltaTime);	// Interps Capsule Half Height when crouching / Standing
 
-	UFUNCTION(BlueprintCallable)
-	void FinishReload();
-	UFUNCTION()
-	void AutoFireReset();
-	UFUNCTION()
-	void FinishCrosshairBulletFire();
+	void PickupAmmo(class AAmmo* Ammo);
 
 	/**
 	 *  Called from Animation Blueprint with Grab Clip notify
