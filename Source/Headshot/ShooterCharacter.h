@@ -18,6 +18,19 @@ enum class ECombatState : uint8
 
 	ECS_MAX					UMETA(DisplayName = "DefaultMAX")
 };
+
+USTRUCT(BlueprintType)
+struct FInterpLocation
+{
+	GENERATED_BODY(); // <- Is needed
+
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)	// Scene component to use for it's location
+	USceneComponent* SceneComponent;
+
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)	// Number of intem interping to/at this scene comp location
+	int32 ItemCount;
+};
+
 UCLASS()
 class HEADSHOT_API AShooterCharacter : public ACharacter
 {
@@ -87,6 +100,8 @@ protected:
 	void InterpCapsuleHalfHeight(float DeltaTime);	// Interps Capsule Half Height when crouching / Standing
 
 	void PickupAmmo(class AAmmo* Ammo);
+	void InitializeInterpLocations();
+
 
 	/**
 	 *  Called from Animation Blueprint with Grab Clip notify
@@ -178,7 +193,7 @@ private:
 	float AimingTurnRate;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))	// Turn rate when aiming
 	float AimingLookUpRate;
-	
+
 	/*
 	 *	Scale factor mouse look sensitivity.Turn rate when not aiming -
 	 *	ClampMin/Max beschränkt den werte Bereich. UIMin/Max beschränkt den Slider im Editor auf jeweiligen werten Bereich
@@ -237,6 +252,26 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))		// Field of view value for when zoomed in
 	float CameraZoomedFOV;
 
+
+	// Interp Components
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USceneComponent* WeaponInterpComp;
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USceneComponent* InterpComp1;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USceneComponent* InterpComp2;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USceneComponent* InterpComp3;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USceneComponent* InterpComp4;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USceneComponent* InterpComp5;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USceneComponent* InterpComp6;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))	// Array of interp locations structs 
+	TArray<FInterpLocation> InterpLocations;
+
+
 	float CurrentCapsuleHalfHeight;			// Current half height of the capsule		
 	float CameraCurrentFOV;					// Current field of view this frame
 
@@ -261,6 +296,8 @@ public:
 	FORCEINLINE int8 GetOverlappedItemCount() const { return OverlappedItemCount; }
 	FORCEINLINE ECombatState GetCombatState() const { return CombatState; }
 	FORCEINLINE bool GetCrouching()const { return bCrouching; }
+	
+	FInterpLocation GetFInterpLocation(int32 Index);
 
 	UFUNCTION(BlueprintCallable)
 	float GetCrosshairSpreadMultiplier() const;
@@ -268,5 +305,9 @@ public:
 	void IncrementOverlappedItemCount(int8 Amount);			// Adds/ subtracts to/from OverlappedItemCount and updates bShouldTraceForItems
 	void GetPickupItem(AItem* Item);
 
-	FVector GetCameraInterpLocation();
+	// No longer needed; AItem has GetInterpLocation
+	/*FVector GetCameraInterpLocation();*/
+
+	int32 GetInterpLocationIndex();							// Returns the index in InterpLocations array with the lowest intem count
+	void IncrementInterpLocItemCount(int32 Index, int32 Amount);
 };

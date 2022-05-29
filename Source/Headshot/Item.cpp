@@ -7,7 +7,8 @@
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Camera/CameraComponent.h"
-
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 #include "ShooterCharacter.h"
 
 // Sets default values
@@ -24,7 +25,9 @@ AItem::AItem() :
 	ZCurveTime(.7f),
 	ItemInterpX(0.f),
 	ItemInterpY(0.f),
-	InterpInitialYawOffset(0.f)
+	InterpInitialYawOffset(0.f),
+	ItemType(EItemType::EIT_MAX),
+	InterpLocIndex(0)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -233,6 +236,8 @@ void AItem::FinishIterping()
 	bInterping = false;
 	if (Character)
 	{
+		// Subtract 1 from the intem Count of the interp location struct
+		Character->IncrementInterpLocItemCount(InterpLocIndex, -1);
 		Character->GetPickupItem(this);
 	}
 
@@ -254,7 +259,7 @@ void AItem::ItemInterp(float DealtaTime)
 		// Get the item's initial location when the curve started
 		FVector ItemLocation = ItemInterpStartLocation;
 		// Get location in front of the camera
-		const FVector CameraInterpLocation{ Character->GetCameraInterpLocation() };
+		const FVector CameraInterpLocation{ GetInterpLocation()};
 
 		// Vector from the Item to camera interp location, X and Y are zeroed out 
 		const FVector ItemToCamera{ 0.f,0.f,(CameraInterpLocation - ItemLocation).Z };
@@ -292,6 +297,24 @@ void AItem::ItemInterp(float DealtaTime)
 	}
 }
 
+
+FVector AItem::GetInterpLocation()
+{
+	if (Character == nullptr) return FVector(0.f);
+
+	switch (ItemType)
+	{
+	case EItemType::EIT_Ammo:
+		return Character->GetFInterpLocation(InterpLocIndex).SceneComponent->GetComponentLocation();
+		break;
+	case EItemType::EIT_Weapon:
+		return Character->GetFInterpLocation(InterpLocIndex).SceneComponent->GetComponentLocation();
+		break;
+	}
+
+	return FVector();
+}
+
 void AItem::SetItemState(EItemState State)
 {
 	ItemState = State;
@@ -301,7 +324,18 @@ void AItem::SetItemState(EItemState State)
 void AItem::StartItemCurve(AShooterCharacter* Char)
 {
 	// store a handle to Character
-	Character = Char; 
+	Character = Char;
+
+	// Get array index in interp Locations with the lowest item count
+	InterpLocIndex = Character->GetInterpLocationIndex(); 
+
+	// Add 1 to the item count for this interp location struct
+	Character->IncrementInterpLocItemCount(InterpLocIndex, 1);
+
+	if (PickupSound)
+	{
+		UGameplayStatics::PlaySound2D(this, PickupSound);
+	}
 
 	// Store initial location of the Item
 	ItemInterpStartLocation = GetActorLocation();

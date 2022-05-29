@@ -30,6 +30,15 @@ enum class EItemState : uint8
 	EIS_MAX			UMETA(DisplayName = "DefaultMAX")
 };
 
+UENUM(BlueprintType)
+enum class EItemType : uint8
+{
+	EIT_Ammo UMETA(DisplayName = "Ammo"),
+	EIT_Weapon UMETA(DisplayName = "Weapon"),
+
+	EIT_MAX UMETA(DisplayName = "DefaultMAX")
+}; 
+
 UCLASS()
 class HEADSHOT_API AItem : public AActor
 {
@@ -49,8 +58,7 @@ protected:
 	// Called when overlapping AreaSpere
 	UFUNCTION()
 	void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	// Called when End overlapping AreaSpere
-	UFUNCTION()
+	// Called when end overlapping AreaSpere
 	void OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	// Sets ActiveStars array of bools based on rarity
@@ -64,6 +72,8 @@ protected:
 
 	// Handles item interpolation when in the EquipInterping state 
 	void ItemInterp(float DealtaTime);
+
+	FVector GetInterpLocation();
 private:
 
 	/**
@@ -92,32 +102,30 @@ private:
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))		// The name which on the Pickup Widget
 	FString ItemName;
-
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))		// Item count (Ammo, etc.)
 	int32 ItemCount;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))		// Item rarity - determines number of stars in Pickup widget
 	EItemRarity ItemRartiy;
-	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))	// State of the Item
 	EItemState ItemState;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))	// Starting location when interping begins
 	FVector ItemInterpStartLocation;
-	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))	// Target interp location in front of the camera
 	FVector CameraTargetLocation;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))	// 
 	TArray<bool> ActiveStars;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))	// True when interping
 	bool bInterping;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))		// Duration of the curve and timer
 	float ZCurveTime;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = "Item Properties", meta = (AllowPrivateAccess = "true"))		// Enum for the type of item this Item is
+	EItemType ItemType;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))	// Index of the interp location this intem is interping to
+	int32 InterpLocIndex;
 
 	FTimerHandle ItemInterpTimer; // Plays when we start interping
+
+
 
 	// X and Y for the Item while interping in the EquipInterping state
 	float ItemInterpX;	
