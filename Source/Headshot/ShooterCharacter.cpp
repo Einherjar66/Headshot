@@ -44,7 +44,6 @@ AShooterCharacter::AShooterCharacter() :
 	MouseAimingTurnRate(.5f),
 	MouseAimingLookUpRate(.5f),
 
-
 	// True when aiming the weapon
 	bAiming(false),
 
@@ -89,8 +88,13 @@ AShooterCharacter::AShooterCharacter() :
 	CameraInterpDistance(250.f),
 	CameraIterpElevation(65.f),
 	bCrouching(false),
-	bAimingButtonPressed(true)
+	bAimingButtonPressed(true),
 
+	// Pickup sound timer properties
+	bShouldPlayPickupSound(true),
+	bShouldPlayEquipSound(true),
+	EquipSoundResetTime(.2f),
+	PickupSoundResetTime(.2f)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -142,8 +146,6 @@ AShooterCharacter::AShooterCharacter() :
 
 	InterpComp6 = CreateDefaultSubobject<USceneComponent>(FName("InterpComp6"));
 	InterpComp6->SetupAttachment(GetFollowCamera());
-
-
 
 }
 
@@ -895,6 +897,16 @@ void AShooterCharacter::AutoFireReset()
 	}
 }
 
+void AShooterCharacter::ResetPickupSoundTimer()
+{
+	bShouldPlayPickupSound = true;
+}
+
+void AShooterCharacter::ResetEquipsoundTimer()
+{
+	bShouldPlayEquipSound = true;
+}
+
 FInterpLocation AShooterCharacter::GetFInterpLocation(int32 Index)
 {
 	if (Index <= InterpLocations.Num())
@@ -907,6 +919,18 @@ FInterpLocation AShooterCharacter::GetFInterpLocation(int32 Index)
 float AShooterCharacter::GetCrosshairSpreadMultiplier() const
 {
 	return CrosshairSpreadMultiplier;
+}
+
+void AShooterCharacter::StartPickupSoundTimer()
+{
+	bShouldPlayPickupSound = false;
+	GetWorldTimerManager().SetTimer(PickupSoundTimer, this, &AShooterCharacter::ResetPickupSoundTimer, PickupSoundResetTime);
+}
+
+void AShooterCharacter::StartEquipSoundTimer()
+{
+	bShouldPlayEquipSound = false;
+	GetWorldTimerManager().SetTimer(EquipSoundTimer, this, &AShooterCharacter::ResetEquipsoundTimer, EquipSoundResetTime);
 }
 
 void AShooterCharacter::IncrementOverlappedItemCount(int8 Amount)
@@ -926,10 +950,7 @@ void AShooterCharacter::IncrementOverlappedItemCount(int8 Amount)
 
 void AShooterCharacter::GetPickupItem(AItem* Item)
 {
-	if (Item->GetEquipSound())
-	{
-		UGameplayStatics::PlaySound2D(this, Item->GetEquipSound());
-	}
+	Item->PlayEquipSound();
 
 	AWeapon* Weapon = Cast<AWeapon>(Item);
 	if (Weapon)

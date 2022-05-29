@@ -50,6 +50,9 @@ public:
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	
+	// Called in AShooterCharacter::GetPickupItem
+	void PlayEquipSound();
 
 protected:
 	// Called when the game starts or when spawned
@@ -74,6 +77,9 @@ protected:
 	void ItemInterp(float DealtaTime);
 
 	FVector GetInterpLocation();
+
+	void PlayPickupSound();
+
 private:
 
 	/**

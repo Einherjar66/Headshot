@@ -251,7 +251,10 @@ private:
 	float CameraDefaultFOV;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))		// Field of view value for when zoomed in
 	float CameraZoomedFOV;
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))			// Time to wait before we can play another Pickup Sound
+	float PickupSoundResetTime;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))			// Time to wait before we can play another Equip Sound
+	float EquipSoundResetTime;
 
 	// Interp Components
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
@@ -274,20 +277,26 @@ private:
 
 	float CurrentCapsuleHalfHeight;			// Current half height of the capsule		
 	float CameraCurrentFOV;					// Current field of view this frame
-
 	float ShootTimeDuration;
 	bool bFiringBullet;
 	FTimerHandle CrosshairShootTimer;
-
 	bool bFireButtonPressed;				// Left mouse button or right console trigger pressed 
 	bool bShouldFire;						// True when we can fire. False when waiting for the timer
 	float AutomaticFireRate;				// Rate of automatic gun fire
 	FTimerHandle AutoFireTimer;				// Sets a timer between gunshots
-
 	bool bShouldTraceForItems;				// True if we should trace every frame for items
 	int8 OverlappedItemCount;				// Number of overlapped AItems
-
 	bool bAimingButtonPressed;				// Use for knowing when the aiming button ist pressed
+
+	FTimerHandle PickupSoundTimer;
+	FTimerHandle EquipSoundTimer;
+	bool bShouldPlayPickupSound;
+	bool bShouldPlayEquipSound;
+
+	void ResetPickupSoundTimer();
+	void ResetEquipsoundTimer();
+
+
 public:
 
 	FORCEINLINE USpringArmComponent* GetSpringArmComponent() const { return SpringArmComponent; }				// Returns USpringArmComponent subobject
@@ -296,12 +305,16 @@ public:
 	FORCEINLINE int8 GetOverlappedItemCount() const { return OverlappedItemCount; }
 	FORCEINLINE ECombatState GetCombatState() const { return CombatState; }
 	FORCEINLINE bool GetCrouching()const { return bCrouching; }
-	
+	FORCEINLINE bool ShouldPlayPickupSound() const { return bShouldPlayPickupSound; }
+	FORCEINLINE bool ShouldPlayEquipSound() const { return bShouldPlayEquipSound; }
+
 	FInterpLocation GetFInterpLocation(int32 Index);
 
 	UFUNCTION(BlueprintCallable)
 	float GetCrosshairSpreadMultiplier() const;
 	
+	void StartPickupSoundTimer();
+	void StartEquipSoundTimer();
 	void IncrementOverlappedItemCount(int8 Amount);			// Adds/ subtracts to/from OverlappedItemCount and updates bShouldTraceForItems
 	void GetPickupItem(AItem* Item);
 
