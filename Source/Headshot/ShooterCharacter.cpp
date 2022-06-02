@@ -162,6 +162,8 @@ void AShooterCharacter::BeginPlay()
 
 	// Spawn the default weapon and equip it
 	EquipWeapon(SpawnDefaultWeapon());
+	EquippedWeapon->DisableCustomDepht();
+	EquippedWeapon->DisableGlowMaterial();
 
 	InitializeAmmoMap();
 	GetCharacterMovement()->MaxWalkSpeed = BaseMovementSpeed;
@@ -745,6 +747,7 @@ void AShooterCharacter::TraceForItems()
 				
 				// Show Item's Pickup widget
 				TraceHitItem->GetPickupWidget()->SetVisibility(true);
+				TraceHitItem->EnableCustomDepht();
 			}
 
 			// We hit an AItem last frame
@@ -754,6 +757,7 @@ void AShooterCharacter::TraceForItems()
 				{
 					// We are hitting a different AItem this frame from last frame. Or AItem is null
 					TraceHitItemLastFrame->GetPickupWidget()->SetVisibility(false);
+					TraceHitItemLastFrame->DisableCustomDepht();
 				}
 			}
 
@@ -766,6 +770,7 @@ void AShooterCharacter::TraceForItems()
 	{
 		// No longer overlapping any item, Item last frame should not show widget
 		TraceHitItemLastFrame->GetPickupWidget()->SetVisibility(false);
+		TraceHitItemLastFrame->DisableCustomDepht();
 	}
 }
 
@@ -815,6 +820,7 @@ AWeapon* AShooterCharacter::SpawnDefaultWeapon()
 	{
 		// Spawn the Weapon
 		return GetWorld()->SpawnActor<AWeapon>(DefaultWeaponClass);
+
 	}
 	return nullptr;
 }

@@ -9,6 +9,7 @@
 #include "Camera/CameraComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
+#include "Curves/CurveVector.h"
 #include "ShooterCharacter.h"
 
 // Sets default values
@@ -27,7 +28,15 @@ AItem::AItem() :
 	ItemInterpY(0.f),
 	InterpInitialYawOffset(0.f),
 	ItemType(EItemType::EIT_MAX),
-	InterpLocIndex(0)
+	InterpLocIndex(0),
+	MaterialIndex(0),
+	bCanChangeCustomDepth(true),
+
+	// Dynamic Material Parameters
+	GlowAmount(150.f),
+	FresnelExponent(3.f),
+	FresnelReflectFraction(4.f),
+	PulseCurveTime(5.f)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -67,6 +76,11 @@ void AItem::BeginPlay()
 
 	// Set Item properties based on ItemState
 	SetItemProperties(ItemState);
+
+	// Set custom depth to disable
+	InitializeCustomDepth();
+
+	StartPulseTimer();
 }
 
 void AItem::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -243,7 +257,9 @@ void AItem::FinishIterping()
 
 	// Set Scale back to normal
 	SetActorScale3D(FVector(1.f));
-
+	DisableGlowMaterial();
+	bCanChangeCustomDepth = true;
+	DisableCustomDepht();
 }
 
 void AItem::ItemInterp(float DealtaTime)
@@ -331,6 +347,70 @@ void AItem::PlayPickupSound()
 	}
 }
 
+void AItem::EnableGlowMaterial()
+{
+	if (DynamicMaterialInstance)
+	{
+		DynamicMaterialInstance->SetScalarParameterValue(TEXT("GlowBlendAlpha"), 0.f);
+	}
+}
+
+void AItem::UpdatePulse()
+{
+	if (ItemState != EItemState::EIS_Pickup) return;
+	
+	const float ElapsedTime{ GetWorldTimerManager().GetTimerElapsed(PulseTimer) };
+	if (PulseCurve)
+	{
+		const FVector CurveValue{ PulseCurve->GetVectorValue(ElapsedTime) };
+		DynamicMaterialInstance->SetScalarParameterValue(TEXT("GlowAmount"), CurveValue.X * GlowAmount);
+		DynamicMaterialInstance->SetScalarParameterValue(TEXT("FresnelExponent"), CurveValue.Y * FresnelExponent);
+		DynamicMaterialInstance->SetScalarParameterValue(TEXT("FresnelReflectFraction"), CurveValue.Z * FresnelReflectFraction);
+	}
+
+
+}
+
+void AItem::DisableGlowMaterial()
+{
+	if (DynamicMaterialInstance)
+	{
+		DynamicMaterialInstance->SetScalarParameterValue(TEXT("GlowBlendAlpha"), 1.f);
+	}
+}
+
+void AItem::EnableCustomDepht()
+{
+	
+	if (bCanChangeCustomDepth)
+	{
+		ItemMesh->SetRenderCustomDepth(true);
+	}
+}
+
+void AItem::DisableCustomDepht()
+{
+	if (bCanChangeCustomDepth)
+	{
+		ItemMesh->SetRenderCustomDepth(false);
+	}
+}
+
+void AItem::InitializeCustomDepth()
+{
+	DisableCustomDepht();
+}
+
+void AItem::OnConstruction(const FTransform& Transform)
+{
+	if (MaterialInstance)
+	{
+		DynamicMaterialInstance = UMaterialInstanceDynamic::Create(MaterialInstance, this);
+		ItemMesh->SetMaterial(MaterialIndex, DynamicMaterialInstance);
+	}
+	EnableGlowMaterial();
+}
+
 void AItem::PlayEquipSound()
 {
 	if (Character)
@@ -343,6 +423,19 @@ void AItem::PlayEquipSound()
 				UGameplayStatics::PlaySound2D(this, EquipSound);
 			}
 		}
+	}
+}
+
+void AItem::ResetPulseTimer()
+{
+	StartPulseTimer();
+}
+
+void AItem::StartPulseTimer()
+{
+	if (ItemState == EItemState::EIS_Pickup)
+	{
+		GetWorldTimerManager().SetTimer(PulseTimer, this,&AItem::ResetPulseTimer, PulseCurveTime);
 	}
 }
 
@@ -380,14 +473,17 @@ void AItem::StartItemCurve(AShooterCharacter* Char)
 
 	// Initial Yaw offset between Camera and Item
 	InterpInitialYawOffset =  ItemRotaionYaw - CameraRotationYaw;
+
+	bCanChangeCustomDepth = false;
 }
 
 // Called every frame
 void AItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 	// Handles item interpolation when in the EquipInterping state 
 	ItemInterp(DeltaTime);
+	// Get Cureve values from PulseCurve and set dynamic material parameters
+	UpdatePulse();
 }
 

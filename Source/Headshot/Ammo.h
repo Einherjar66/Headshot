@@ -29,6 +29,7 @@ protected:
 	UFUNCTION()
 	void AmmoShpereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+
 private:
 
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category = "Ammo", meta = (AllowPrivateAccess = "true"))	// Mesh for the ammo pickup
@@ -44,4 +45,8 @@ public:
 
 	FORCEINLINE UStaticMeshComponent* GetAmmoMesh() const { return AmmoMesh; }
 	FORCEINLINE EAmmoType GetAmmoType() const { return AmmoType; }
+
+
+	virtual void EnableCustomDepht() override;
+	virtual void DisableCustomDepht() override;
 };

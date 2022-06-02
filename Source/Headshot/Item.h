@@ -77,8 +77,14 @@ protected:
 	void ItemInterp(float DealtaTime);
 
 	FVector GetInterpLocation();
-
 	void PlayPickupSound();
+	void EnableGlowMaterial();
+	void UpdatePulse();
+	void ResetPulseTimer();
+	void StartPulseTimer();
+
+	virtual void InitializeCustomDepth();
+	virtual void OnConstruction(const FTransform& Transform) override;
 
 private:
 
@@ -103,6 +109,13 @@ private:
 	class USoundCue* PickupSound;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))		// Sound played when the Item is equipped
 	USoundCue* EquipSound;
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))	// Dynamic instance that we can change at runtime
+	UMaterialInstanceDynamic* DynamicMaterialInstance;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))		// Material instance used with the Dynamic Material instance
+	UMaterialInstance* MaterialInstance;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))	// Curve to drive the dynamic material parameters
+	class UCurveVector* PulseCurve;
+
 	/**
 	 * Variables
 	 */
@@ -128,10 +141,20 @@ private:
 	EItemType ItemType;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))	// Index of the interp location this intem is interping to
 	int32 InterpLocIndex;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	int32 MaterialIndex;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))	// Time for the PulseTimer
+	float PulseCurveTime;
+	UPROPERTY(VisibleAnywhere,Category = "Item Properties", meta = (AllowPrivateAccess = "true"))						// 
+	float GlowAmount;
+	UPROPERTY(VisibleAnywhere, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))						// 
+	float FresnelExponent;
+	UPROPERTY(VisibleAnywhere, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))						// 
+	float FresnelReflectFraction;
 
 	FTimerHandle ItemInterpTimer; // Plays when we start interping
-
-
+	FTimerHandle PulseTimer;
+	bool bCanChangeCustomDepth;
 
 	// X and Y for the Item while interping in the EquipInterping state
 	float ItemInterpX;	
@@ -139,6 +162,7 @@ private:
 
 	// Initial Yaw offset between the camera and the interping item
 	float InterpInitialYawOffset;
+
 public:
 
 	FORCEINLINE UWidgetComponent* GetPickupWidget() const { return PickupWidget; }
@@ -151,4 +175,7 @@ public:
 	FORCEINLINE int32 GetItemCount() const { return ItemCount; }
 	void SetItemState(EItemState State);
 	void StartItemCurve(AShooterCharacter* Char); // Called from the AShooterCharacter class
+	virtual void EnableCustomDepht();
+	virtual void DisableCustomDepht();
+	void DisableGlowMaterial();
 };
