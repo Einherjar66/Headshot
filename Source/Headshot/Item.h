@@ -115,6 +115,8 @@ private:
 	UMaterialInstance* MaterialInstance;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))	// Curve to drive the dynamic material parameters
 	class UCurveVector* PulseCurve;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))	// Curve to drive the dynamic material parameters
+	UCurveVector* InterpPulseCurve;
 
 	/**
 	 * Variables
