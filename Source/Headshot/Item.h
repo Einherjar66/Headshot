@@ -117,7 +117,12 @@ private:
 	class UCurveVector* PulseCurve;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))	// Curve to drive the dynamic material parameters
 	UCurveVector* InterpPulseCurve;
-
+	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))				// Background for this item in the inventory
+	class UTexture2D* IconBackground;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))			// Icon for this item in the inventory
+	UTexture2D* IconItem;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))			// AmmoIcon for this item in the inventory
+	UTexture2D* AmmoIcon;
 	/**
 	 * Variables
 	 */
@@ -153,6 +158,8 @@ private:
 	float FresnelExponent;
 	UPROPERTY(VisibleAnywhere, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))						// 
 	float FresnelReflectFraction;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))			// Slot in the inventory array
+	int32 SlotIndex;
 
 	FTimerHandle ItemInterpTimer; // Plays when we start interping
 	FTimerHandle PulseTimer;
@@ -180,4 +187,8 @@ public:
 	virtual void EnableCustomDepht();
 	virtual void DisableCustomDepht();
 	void DisableGlowMaterial();
+
+	FORCEINLINE int32 GetSlotIndex() const { return SlotIndex; }
+	FORCEINLINE void SetSlotIndex(int32 Index ) { SlotIndex = Index; }
+
 };

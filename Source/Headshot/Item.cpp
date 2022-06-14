@@ -31,6 +31,7 @@ AItem::AItem() :
 	InterpLocIndex(0),
 	MaterialIndex(0),
 	bCanChangeCustomDepth(true),
+	SlotIndex(0),
 
 	// Dynamic Material Parameters
 	GlowAmount(150.f),
@@ -198,7 +199,23 @@ void AItem::SetItemProperties(EItemState State)
 
 		break;
 	case EItemState::EIS_Pickedup:
-		
+
+		PickupWidget->SetVisibility(false);
+		// Set mesh properties
+		ItemMesh->SetSimulatePhysics(false);
+		ItemMesh->SetEnableGravity(false);
+		ItemMesh->SetVisibility(false);
+		ItemMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
+		ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		// Set AreaSphere properties
+		AreaSphere->SetCollisionResponseToChannels(ECollisionResponse::ECR_Ignore);
+		AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		// Set CollisionBox properties
+		CollisionBox->SetCollisionResponseToChannels(ECollisionResponse::ECR_Ignore);
+		CollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 		break;
 	case EItemState::EIS_Equipped:
 
@@ -385,7 +402,7 @@ void AItem::UpdatePulse()
 	}
 
 	if (DynamicMaterialInstance)
-	{
+	{	// Hier wird jede einzelne Achse in der erstellten(in Engine) VectorCurve Angesprochen. 
 		DynamicMaterialInstance->SetScalarParameterValue(TEXT("GlowAmount"), CurveValue.X * GlowAmount);
 		DynamicMaterialInstance->SetScalarParameterValue(TEXT("FresnelExponent"), CurveValue.Y * FresnelExponent);
 		DynamicMaterialInstance->SetScalarParameterValue(TEXT("FresnelReflectFraction"), CurveValue.Z * FresnelReflectFraction);

@@ -255,11 +255,15 @@ private:
 	float PickupSoundResetTime;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))			// Time to wait before we can play another Equip Sound
 	float EquipSoundResetTime;
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category = "Inventory" , meta = (AllowPrivateAccess = "true"))		// Array of AItems for our Inventory
+	TArray<AItem*> Inventory;
+	
+	
 
 	// Interp Components
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	USceneComponent* WeaponInterpComp;
-	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	USceneComponent* InterpComp1;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	USceneComponent* InterpComp2;
@@ -275,6 +279,7 @@ private:
 	TArray<FInterpLocation> InterpLocations;
 
 
+	
 	float CurrentCapsuleHalfHeight;			// Current half height of the capsule		
 	float CameraCurrentFOV;					// Current field of view this frame
 	float ShootTimeDuration;
@@ -293,9 +298,11 @@ private:
 	bool bShouldPlayPickupSound;
 	bool bShouldPlayEquipSound;
 
+	const int32 INVENTORY_CAPACITY{ 6 };
+
+
 	void ResetPickupSoundTimer();
 	void ResetEquipsoundTimer();
-
 
 public:
 
