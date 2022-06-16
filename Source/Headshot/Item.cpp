@@ -241,6 +241,7 @@ void AItem::SetItemProperties(EItemState State)
 		// Set mesh properties
 		ItemMesh->SetSimulatePhysics(true);
 		ItemMesh->SetEnableGravity(true);
+		ItemMesh->SetVisibility(true);
 		ItemMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		ItemMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 		ItemMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
@@ -270,7 +271,6 @@ void AItem::FinishIterping()
 		// Subtract 1 from the intem Count of the interp location struct
 		Character->IncrementInterpLocItemCount(InterpLocIndex, -1);
 		Character->GetPickupItem(this);
-		SetItemState(EItemState::EIS_Pickedup);
 	}
 
 	// Set Scale back to normal
@@ -278,6 +278,7 @@ void AItem::FinishIterping()
 	DisableGlowMaterial();
 	bCanChangeCustomDepth = true;
 	DisableCustomDepht();
+
 }
 
 void AItem::ItemInterp(float DealtaTime)

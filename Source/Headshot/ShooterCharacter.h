@@ -15,6 +15,7 @@ enum class ECombatState : uint8
 	ECS_Unoccupied			UMETA(DisplayName = "Unoccupied"),
 	ECS_FireTimerInPorgess	UMETA(DisplayName = "FireTimerInPorgess"),
 	ECS_Reloading			UMETA(DisplayName = "Reloading"),
+	ECS_Equipping			UMETA(DisplayName = "Equipping"),
 
 	ECS_MAX					UMETA(DisplayName = "DefaultMAX")
 };
@@ -30,6 +31,8 @@ struct FInterpLocation
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)	// Number of intem interping to/at this scene comp location
 	int32 ItemCount;
 };
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FEquipItemDelegate, int32, CurrentSlotIndex, int32, NewSlotIndex);
 
 UCLASS()
 class HEADSHOT_API AShooterCharacter : public ACharacter
@@ -54,6 +57,8 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void FinishReload();
+	UFUNCTION(BlueprintCallable)
+	void FinishEquipping();
 	UFUNCTION()
 	void AutoFireReset();
 	UFUNCTION()
@@ -102,6 +107,13 @@ protected:
 	void PickupAmmo(class AAmmo* Ammo);
 	void InitializeInterpLocations();
 
+	void FKeyPressed();
+	void WeaponSlotOneKeyPressed();
+	void WeaponSlotTwoKeyPressed();
+	void WeaponSlotThreeKeyPressed();
+	void WeaponSlotFourKeyPressed();
+	void WeaponSlotFiveKeyPressed();
+	void ExchangeInventoryItems(int32 CurrentItemIndex, int32 NewItemIndex);
 
 	/**
 	 *  Called from Animation Blueprint with Grab Clip notify
@@ -165,6 +177,8 @@ private:
 	class UAnimMontage* HipFire;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Montage for Reload animation
 	UAnimMontage* ReloadMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Montage for Equipping a weapon animation
+	UAnimMontage* EquipMontage;
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Currently equipped Weapon
 	AWeapon* EquippedWeapon;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))		// The AItem we hit last frame
@@ -257,8 +271,9 @@ private:
 	float EquipSoundResetTime;
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category = "Inventory" , meta = (AllowPrivateAccess = "true"))		// Array of AItems for our Inventory
 	TArray<AItem*> Inventory;
-	
-	
+	UPROPERTY(BlueprintAssignable, Category = "Delegates", meta = (AllowPrivateAccess = "true"))					// Delegate for sending slot information to InventoryBar when equiping
+	FEquipItemDelegate EquipItemDelegate;
+
 
 	// Interp Components
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
@@ -277,8 +292,7 @@ private:
 	USceneComponent* InterpComp6;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))	// Array of interp locations structs 
 	TArray<FInterpLocation> InterpLocations;
-
-
+	
 	
 	float CurrentCapsuleHalfHeight;			// Current half height of the capsule		
 	float CameraCurrentFOV;					// Current field of view this frame
@@ -300,6 +314,7 @@ private:
 
 	const int32 INVENTORY_CAPACITY{ 6 };
 
+	
 
 	void ResetPickupSoundTimer();
 	void ResetEquipsoundTimer();
