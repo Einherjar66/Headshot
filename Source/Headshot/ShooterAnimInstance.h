@@ -16,9 +16,6 @@ enum class EOffsetState : uint8
 	EOS_MAX UMETA(DisplayName = "DefaultMAX")
 };
 
-/**
- * 
- */
 UCLASS()
 class HEADSHOT_API UShooterAnimInstance : public UAnimInstance
 {
@@ -64,6 +61,8 @@ private:
 	bool bIsReloading;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Crouch", meta = (AllowPrivateAccess = "true"))		// true when Crouching
 	bool bCrouching;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Reaload", meta = (AllowPrivateAccess = "true"))		// true when Equipping
+	bool bEquipping;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Change the recoil weight based on turning in place aiming
 	float RecoilWeight;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// True when tufning in place
