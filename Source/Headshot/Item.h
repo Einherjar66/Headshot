@@ -52,7 +52,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	
 	// Called in AShooterCharacter::GetPickupItem
-	void PlayEquipSound();
+	void PlayEquipSound(bool bForcePlaySound = false);
 
 protected:
 	// Called when the game starts or when spawned
@@ -77,7 +77,7 @@ protected:
 	void ItemInterp(float DealtaTime);
 
 	FVector GetInterpLocation();
-	void PlayPickupSound();
+	void PlayPickupSound(bool bForcePlaySound = false);
 	void EnableGlowMaterial();
 	void UpdatePulse();
 	void ResetPulseTimer();
@@ -182,8 +182,9 @@ public:
 	FORCEINLINE USoundCue* GetPickupSound() const { return PickupSound; }
 	FORCEINLINE USoundCue* GetEquipSound() const { return EquipSound; }
 	FORCEINLINE int32 GetItemCount() const { return ItemCount; }
+	FORCEINLINE void SetCharacter(AShooterCharacter* Char) { Character = Char; }
 	void SetItemState(EItemState State);
-	void StartItemCurve(AShooterCharacter* Char); // Called from the AShooterCharacter class
+	void StartItemCurve(AShooterCharacter* Char, bool bForcePlaySound = false); // Called from the AShooterCharacter class
 	virtual void EnableCustomDepht();
 	virtual void DisableCustomDepht();
 	void DisableGlowMaterial();
