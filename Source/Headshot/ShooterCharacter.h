@@ -33,6 +33,7 @@ struct FInterpLocation
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FEquipItemDelegate, int32, CurrentSlotIndex, int32, NewSlotIndex);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FHighlightIconDelegate, int32, SlotIndex, bool, StartAnimataion);
 
 UCLASS()
 class HEADSHOT_API AShooterCharacter : public ACharacter
@@ -64,21 +65,21 @@ protected:
 	UFUNCTION()
 	void FinishCrosshairBulletFire();
 
-	void MoveForward(float Value);				// Called for Forward / backward input
-	void MoveRight(float Value);				// Called for side to side input
-	void FireWeapon();							// Called when fire Button is pressed
-	void AimingButtonPressed();					// SetbAmin to true
-	void AimingButtonReleased();				// Set bAiming to false
-	void SetLookUpRates();						// Set BaseTurnRate an BaseLookUpRate based on Aiming
-	void TraceForItems();						// Trace for Item if OverlappedItemCount >0
-	void EquipWeapon(AWeapon* WeaponToEquip);	// Takes a weapon an attaches it to the mesh
-	void DropWeapon();							// Detach weapon and let it fall to the ground
-	void SwapWeapon(AWeapon* WeaponToSwap);		// Drops currently equipped Weapon and Equips TraceHitItem 
-	void InitializeAmmoMap();					// Init the Ammo Map with ammo values
+	void MoveForward(float Value);										// Called for Forward / backward input
+	void MoveRight(float Value);										// Called for side to side input
+	void FireWeapon();													// Called when fire Button is pressed
+	void AimingButtonPressed();											// SetbAmin to true
+	void AimingButtonReleased();										// Set bAiming to false
+	void SetLookUpRates();												// Set BaseTurnRate an BaseLookUpRate based on Aiming
+	void TraceForItems();												// Trace for Item if OverlappedItemCount >0
+	void EquipWeapon(AWeapon* WeaponToEquip, bool bSwapping = false);	// Takes a weapon an attaches it to the mesh
+	void DropWeapon();													// Detach weapon and let it fall to the ground
+	void SwapWeapon(AWeapon* WeaponToSwap);								// Drops currently equipped Weapon and Equips TraceHitItem 
+	void InitializeAmmoMap();											// Init the Ammo Map with ammo values
 	void FireButtonPressed();
 	bool TraceUnderCrosshairs(FHitResult& OutHitResult, FVector OutHitLacation);	// Line trace for items under the crosshairs
 
-	AWeapon* SpawnDefaultWeapon();				// Spawns a default weapon and equips it
+	AWeapon* SpawnDefaultWeapon();										// Spawns a default weapon and equips it
 
 	void Aim();
 	void StopAiming();
@@ -114,7 +115,9 @@ protected:
 	void WeaponSlotFourKeyPressed();
 	void WeaponSlotFiveKeyPressed();
 	void ExchangeInventoryItems(int32 CurrentItemIndex, int32 NewItemIndex);
-
+	int32 GetEmptyInventorySlot();
+	void HighlightInventorySlot();
+	
 	/**
 	 *  Called from Animation Blueprint with Grab Clip notify
 	 */
@@ -231,6 +234,7 @@ private:
 	float CrosshairAimFactor;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Crosshairs", meta = (AllowPrivateAccess = "true"))	// Shooting component for crosshairs spread
 	float CrosshairShootingFactor;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))			// Distance outward from the camera for the interp destination
 	float CameraInterpDistance;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))			// Distance upward from the camera for the interp destination
@@ -241,12 +245,14 @@ private:
 	int32 Starting9mmAmmo;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items", meta = (AllowPrivateAccess = "true"))			// Stating amount of AR ammo
 	int32 StartingARAmmo;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Combat state, can only fire or reload if Unoccupied
 	ECombatState CombatState;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Transform of the clip when we first grab the clip during reloading
 	FTransform ClipTransform;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Scene component to attach to the Charater's hand during reloading
 	USceneComponent* HandSceneComponent;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))		// True when Crouching
 	bool bCrouching;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))		// Regaular movement speed
@@ -265,15 +271,21 @@ private:
 	float CameraDefaultFOV;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))		// Field of view value for when zoomed in
 	float CameraZoomedFOV;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))			// Time to wait before we can play another Pickup Sound
 	float PickupSoundResetTime;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))			// Time to wait before we can play another Equip Sound
 	float EquipSoundResetTime;
+	
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category = "Inventory" , meta = (AllowPrivateAccess = "true"))		// Array of AItems for our Inventory
 	TArray<AItem*> Inventory;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))		// The index for the currently highlighted slot
+	int32 HighlightedSlot;
+
 	UPROPERTY(BlueprintAssignable, Category = "Delegates", meta = (AllowPrivateAccess = "true"))					// Delegate for sending slot information to InventoryBar when equiping
 	FEquipItemDelegate EquipItemDelegate;
-
+	UPROPERTY(BlueprintAssignable, Category = "Delegates", meta = (AllowPrivateAccess = "true"))					// Delegate for sending slot information for playing the incon Animations
+	FHighlightIconDelegate HighlightIconDelegate;
 
 	// Interp Components
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
@@ -339,6 +351,7 @@ public:
 	void StartEquipSoundTimer();
 	void IncrementOverlappedItemCount(int8 Amount);			// Adds/ subtracts to/from OverlappedItemCount and updates bShouldTraceForItems
 	void GetPickupItem(AItem* Item);
+	void UnHighlightInventorySlot();
 
 	// No longer needed; AItem has GetInterpLocation
 	/*FVector GetCameraInterpLocation();*/

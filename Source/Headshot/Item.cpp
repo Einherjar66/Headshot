@@ -107,6 +107,7 @@ void AItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 		if (ShooterCharacter)
 		{
 			ShooterCharacter->IncrementOverlappedItemCount(-1);
+			ShooterCharacter->UnHighlightInventorySlot();
 		}
 	}
 }
@@ -273,6 +274,7 @@ void AItem::FinishIterping()
 		// Subtract 1 from the intem Count of the interp location struct
 		Character->IncrementInterpLocItemCount(InterpLocIndex, -1);
 		Character->GetPickupItem(this);
+		Character->UnHighlightInventorySlot();
 	}
 
 	// Set Scale back to normal
