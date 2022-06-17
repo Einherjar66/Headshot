@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Engine/DataTable.h"
 #include "Item.generated.h"
 
 UENUM(BlueprintType)
@@ -38,6 +39,24 @@ enum class EItemType : uint8
 
 	EIT_MAX UMETA(DisplayName = "DefaultMAX")
 }; 
+USTRUCT(BlueprintType)
+struct FItemRarityTable : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	FLinearColor GlowColor;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FLinearColor LightColor;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FLinearColor DarkColor;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 NumberOfStars;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* IconBackground;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 CustomDepthStencil;
+};
 
 UCLASS()
 class HEADSHOT_API AItem : public AActor
@@ -117,12 +136,12 @@ private:
 	class UCurveVector* PulseCurve;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))	// Curve to drive the dynamic material parameters
 	UCurveVector* InterpPulseCurve;
-	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))				// Background for this item in the inventory
-	class UTexture2D* IconBackground;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))			// Icon for this item in the inventory
 	UTexture2D* IconItem;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))			// AmmoIcon for this item in the inventory
 	UTexture2D* AmmoIcon;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DataTable", meta = (AllowPrivateAccess = "true"))			// Item rarity data table
+	class UDataTable* ItemRarityDataTable;
 	/**
 	 * Variables
 	 */
@@ -130,8 +149,6 @@ private:
 	FString ItemName;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))		// Item count (Ammo, etc.)
 	int32 ItemCount;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))		// Item rarity - determines number of stars in Pickup widget
-	EItemRarity ItemRartiy;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))	// State of the Item
 	EItemState ItemState;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))	// Starting location when interping begins
@@ -162,6 +179,20 @@ private:
 	int32 SlotIndex;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))			// True when player Inventory is full;
 	bool bCharaterInventoryIsFull;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Rarity", meta = (AllowPrivateAccess = "true"))				// Item rarity - determines number of stars in Pickup widget
+	EItemRarity ItemRartiy;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Rarity", meta = (AllowPrivateAccess = "true"))			// Color in the glow material
+	FLinearColor GlowColor;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Rarity", meta = (AllowPrivateAccess = "true"))			// Light color in the Pickup widget
+	FLinearColor LightColor;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Rarity", meta = (AllowPrivateAccess = "true"))			// Dark color in the Pickup widget
+	FLinearColor DarkColor;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Rarity", meta = (AllowPrivateAccess = "true"))			// Numer of stars in the Pickup widget
+	int32 NumberOfStars;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Rarity", meta = (AllowPrivateAccess = "true"))			// Background icon in the Pickup widget
+	class UTexture2D* IconBackground;
+
 
 	FTimerHandle ItemInterpTimer; // Plays when we start interping
 	FTimerHandle PulseTimer;
@@ -174,6 +205,7 @@ private:
 	// Initial Yaw offset between the camera and the interping item
 	float InterpInitialYawOffset;
 
+	
 public:
 
 	FORCEINLINE UWidgetComponent* GetPickupWidget() const { return PickupWidget; }
