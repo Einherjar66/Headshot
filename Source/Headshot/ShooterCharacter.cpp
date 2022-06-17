@@ -679,22 +679,41 @@ void AShooterCharacter::WeaponSlotFiveKeyPressed()
 
 void AShooterCharacter::ExchangeInventoryItems(int32 CurrentItemIndex, int32 NewItemIndex)
 {
-	if ((CurrentItemIndex == NewItemIndex) || (NewItemIndex >= Inventory.Num()) || (CombatState != ECombatState::ECS_Unoccupied)) return; 
-	auto OldEquippedWeapon = EquippedWeapon;
-	auto NewWeapon = Cast<AWeapon>(Inventory[NewItemIndex]);
-	EquipWeapon(NewWeapon);
-	OldEquippedWeapon->SetItemState(EItemState::EIS_Pickedup);
-	NewWeapon->SetItemState(EItemState::EIS_Equipped);
-	
-	CombatState = ECombatState::ECS_Equipping;
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && EquipMontage )
+	bool bCanExchangeItems = (CurrentItemIndex != NewItemIndex) && (NewItemIndex >= Inventory.Num()) && (CombatState == ECombatState::ECS_Unoccupied || CombatState == ECombatState::ECS_Equipping);
+	if (!bCanExchangeItems)
 	{
-		AnimInstance->Montage_Play(EquipMontage,1.f);
-		AnimInstance->Montage_JumpToSection(FName("Equip"));
+		auto OldEquippedWeapon = EquippedWeapon;
+		auto NewWeapon = Cast<AWeapon>(Inventory[NewItemIndex]);
+		EquipWeapon(NewWeapon);
+		OldEquippedWeapon->SetItemState(EItemState::EIS_Pickedup);
+		NewWeapon->SetItemState(EItemState::EIS_Equipped);
+		
+		CombatState = ECombatState::ECS_Equipping;
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance && EquipMontage )
+		{
+			AnimInstance->Montage_Play(EquipMontage,1.f);
+			AnimInstance->Montage_JumpToSection(FName("Equip"));
+		}
+		NewWeapon->PlayEquipSound(true);
+	}
+}
+
+int32 AShooterCharacter::GetEmptyInventorySlot()
+{
+	for (int32 i = 0; i < Inventory.Num() ;i++)
+	{
+		if (Inventory[i] == nullptr)
+		{
+			return i;
+		}
 	}
 
-	NewWeapon->PlayEquipSound(true);
+	if (Inventory.Num() < INVENTORY_CAPACITY)
+	{
+		return Inventory.Num();
+	}
+	return -1; // Inventory is full
 }
 
 int32 AShooterCharacter::GetInterpLocationIndex()
@@ -819,6 +838,16 @@ void AShooterCharacter::TraceForItems()
 				// Show Item's Pickup widget
 				TraceHitItem->GetPickupWidget()->SetVisibility(true);
 				TraceHitItem->EnableCustomDepht();
+				if (Inventory.Num() >= INVENTORY_CAPACITY) 
+				{
+					// Iventory is full
+					TraceHitItem->SetCharaterInventoryFull(true);
+				}
+				else
+				{
+					 // the inventory is not full
+					TraceHitItem->SetCharaterInventoryFull(false);
+				}
 			}
 
 			// We hit an AItem last frame
@@ -911,7 +940,7 @@ void AShooterCharacter::StopAiming()
 	}
 }
 
-void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
+void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip, bool bSwapping)
 {
 	if (WeaponToEquip)
 	{
@@ -931,7 +960,7 @@ void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
 			EquipItemDelegate.Broadcast(-1, WeaponToEquip->GetSlotIndex());
 		} 
 
-		else
+		else if (!bSwapping)
 		{
 			EquipItemDelegate.Broadcast(EquippedWeapon->GetSlotIndex(), WeaponToEquip->GetSlotIndex());
 		}
@@ -963,8 +992,8 @@ void AShooterCharacter::SwapWeapon(AWeapon* WeaponToSwap)
 	}
 
 
-	DropWeapon();				// Drop the current weapon
-	EquipWeapon(WeaponToSwap);	// Take the new one
+	DropWeapon();										// Drop the current weapon
+	EquipWeapon(WeaponToSwap, true);	// Take the new one
 	TraceHitItem = nullptr;
 	TraceHitItemLastFrame = nullptr;
 }

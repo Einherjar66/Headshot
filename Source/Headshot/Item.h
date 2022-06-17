@@ -148,7 +148,7 @@ private:
 	EItemType ItemType;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))	// Index of the interp location this intem is interping to
 	int32 InterpLocIndex;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))		//
 	int32 MaterialIndex;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))	// Time for the PulseTimer
 	float PulseCurveTime;
@@ -160,6 +160,8 @@ private:
 	float FresnelReflectFraction;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))			// Slot in the inventory array
 	int32 SlotIndex;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))			// True when player Inventory is full;
+	bool bCharaterInventoryIsFull;
 
 	FTimerHandle ItemInterpTimer; // Plays when we start interping
 	FTimerHandle PulseTimer;
@@ -191,5 +193,5 @@ public:
 
 	FORCEINLINE int32 GetSlotIndex() const { return SlotIndex; }
 	FORCEINLINE void SetSlotIndex(int32 Index ) { SlotIndex = Index; }
-
+	FORCEINLINE void SetCharaterInventoryFull(bool bFull) { bCharaterInventoryIsFull = bFull; }
 };

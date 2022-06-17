@@ -37,7 +37,8 @@ AItem::AItem() :
 	GlowAmount(150.f),
 	FresnelExponent(3.f),
 	FresnelReflectFraction(4.f),
-	PulseCurveTime(5.f)
+	PulseCurveTime(5.f),
+	bCharaterInventoryIsFull(false)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -131,6 +132,7 @@ void AItem::SetActiveStars()
 		break;
 	case EItemRarity::EIR_Uncommon:
 		ActiveStars[1] = true;
+		ActiveStars[2] = true;
 		ActiveStars[3] = true;
 		break;
 
