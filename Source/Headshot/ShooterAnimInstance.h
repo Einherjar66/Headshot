@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
+#include "WeaponType.h"
 #include "ShooterAnimInstance.generated.h"
 UENUM(BlueprintType)
 enum class EOffsetState : uint8
@@ -67,6 +68,11 @@ private:
 	float RecoilWeight;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// True when tufning in place
 	bool bTurningInPlace;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Weapon type for the currently equipped weapon
+	EWeaponType EquippedWeaponType;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Ture when not realoding or quippuing 
+	bool bShouldUseFABRIK;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Turn in Place", meta = (AllowPrivateAccess = "true")) // Offset state ; use to detemine which Aim Offset to use
 	EOffsetState OffsetState;
 
@@ -78,6 +84,5 @@ private:
 
 	float RotationCurve;
 	float RotationCurveLastFrame;
-
 
 };
