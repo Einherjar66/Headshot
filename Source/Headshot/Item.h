@@ -225,6 +225,13 @@ public:
 	FORCEINLINE void SetItemName(FString Name) { ItemName = Name; }
 	FORCEINLINE void SetIconItem(UTexture2D* Icon) { IconItem = Icon; }
 	FORCEINLINE void SetAmmoIcon(UTexture2D* Icon) { AmmoIcon = Icon; }
+	FORCEINLINE UMaterialInstance* GetMaterialInstance()const { return MaterialInstance; }
+	FORCEINLINE void SetMaterialInstance(UMaterialInstance* Istance) { MaterialInstance = Istance; }
+	FORCEINLINE UMaterialInstanceDynamic* GetDynamicMaterialInstance()const { return DynamicMaterialInstance; }
+	FORCEINLINE void SetDynamicMaterialInstance(UMaterialInstanceDynamic* Istance) { DynamicMaterialInstance = Istance; }
+	FORCEINLINE FLinearColor GetGlowColor() const { return GlowColor; }
+	FORCEINLINE int32 GetMaterialIndex() const { return MaterialIndex; }
+	FORCEINLINE void SetMaterialIndex(int32 Index) { MaterialIndex = Index; }
 
 	void SetItemState(EItemState State);
 	void StartItemCurve(AShooterCharacter* Char, bool bForcePlaySound = false); // Called from the AShooterCharacter class

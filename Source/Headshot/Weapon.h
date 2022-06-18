@@ -40,6 +40,10 @@ struct FWeaponDataTable : public FTableRowBase
 	UTexture2D* InventoryIcon;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UTexture2D* AmmoIcon;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UMaterialInstance* MaterialInstance;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 MaterialIndex;
 };
 
 /**
@@ -81,6 +85,8 @@ private:
 	FName ClipBoneName;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Data Table", meta = (AllowPrivateAccess = "true"))			// Data Table for weapon properties
 	UDataTable* WeaponDataTable;
+
+	int32 PreviousMaterialIndex;
 public:
 
 	void ThrowWeapon();				// Add a Impulse to the weapon

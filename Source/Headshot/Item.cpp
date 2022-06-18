@@ -493,7 +493,6 @@ void AItem::OnConstruction(const FTransform& Transform)
 			IconBackground = RarityRow->IconBackground;
 			if (GetItemMesh())
 			{
-				//TODO Das muss noch mal nachgeholt werden da bei der Compilierung ein fehler aufgetreten ist. Lesson 196.
 				GetItemMesh()->SetCustomDepthStencilValue(RarityRow->CustomDepthStencil);
 			}	
 		}
