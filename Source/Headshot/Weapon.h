@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Item.h"
 #include "AmmoType.h"
+#include "Engine/DataTable.h"
 #include "Weapon.generated.h"
 
 
@@ -16,7 +17,30 @@ enum class EWeaponType : uint8
 
 	EWT_MAX UMETA(DisplayName = "DefaultMAX")
 };
+USTRUCT(BlueprintType)
+struct FWeaponDataTable : public FTableRowBase
+{
+	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EAmmoType AmmoType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 WeaponAmmo;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 MagazinCapacity;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USoundCue* PickupSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundCue* EquipSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USkeletalMesh* ItemMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString ItemName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* InventoryIcon;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* AmmoIcon;
+};
 
 /**
  * 
@@ -34,7 +58,7 @@ public:
 protected:
 
 	void StopFalling();
-
+	virtual void OnConstruction(const FTransform& Transform) override;
 private:
 	FTimerHandle ThrowWeaponTimer;
 	float ThrowWeaponTime;
@@ -55,8 +79,8 @@ private:
 	FName ReloadMontageSection;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Properties", meta = (AllowPrivateAccess = "true"))		// Name for the clip Bone
 	FName ClipBoneName;
-
-
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Data Table", meta = (AllowPrivateAccess = "true"))			// Data Table for weapon properties
+	UDataTable* WeaponDataTable;
 public:
 
 	void ThrowWeapon();				// Add a Impulse to the weapon

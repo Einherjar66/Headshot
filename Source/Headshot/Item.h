@@ -214,16 +214,22 @@ public:
 	FORCEINLINE EItemState GetItemState() const { return ItemState; }
 	FORCEINLINE USkeletalMeshComponent* GetItemMesh() const { return ItemMesh; }
 	FORCEINLINE USoundCue* GetPickupSound() const { return PickupSound; }
+	FORCEINLINE void SetPickupSound(USoundCue* Sound) {PickupSound = Sound; }
 	FORCEINLINE USoundCue* GetEquipSound() const { return EquipSound; }
+	FORCEINLINE void SetEquipSound(USoundCue* Sound) {EquipSound = Sound; }
 	FORCEINLINE int32 GetItemCount() const { return ItemCount; }
 	FORCEINLINE void SetCharacter(AShooterCharacter* Char) { Character = Char; }
+	FORCEINLINE int32 GetSlotIndex() const { return SlotIndex; }
+	FORCEINLINE void SetSlotIndex(int32 Index) { SlotIndex = Index; }
+	FORCEINLINE void SetCharaterInventoryFull(bool bFull) { bCharaterInventoryIsFull = bFull; }
+	FORCEINLINE void SetItemName(FString Name) { ItemName = Name; }
+	FORCEINLINE void SetIconItem(UTexture2D* Icon) { IconItem = Icon; }
+	FORCEINLINE void SetAmmoIcon(UTexture2D* Icon) { AmmoIcon = Icon; }
+
 	void SetItemState(EItemState State);
 	void StartItemCurve(AShooterCharacter* Char, bool bForcePlaySound = false); // Called from the AShooterCharacter class
 	virtual void EnableCustomDepht();
 	virtual void DisableCustomDepht();
 	void DisableGlowMaterial();
 
-	FORCEINLINE int32 GetSlotIndex() const { return SlotIndex; }
-	FORCEINLINE void SetSlotIndex(int32 Index ) { SlotIndex = Index; }
-	FORCEINLINE void SetCharaterInventoryFull(bool bFull) { bCharaterInventoryIsFull = bFull; }
 };
