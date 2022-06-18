@@ -82,7 +82,7 @@ void AWeapon::StopFalling()
 void AWeapon::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-	const FString WeaponPath{ TEXT("DataTable'/Game/_Game/DataTable/WeaponDataTable.WeaponDataTable'") };								// Der Pfard wo der DataTable zu finden ist
+	const FString WeaponPath{ TEXT("DataTable'/Game/_Game/DataTable/WeaponDataTable.WeaponDataTable'") };					// Der Pfard wo der DataTable zu finden ist
 	UDataTable* WeaponTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *WeaponPath));	// 
 	
 	if (WeaponDataTable)
