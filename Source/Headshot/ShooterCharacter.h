@@ -168,10 +168,6 @@ private:
 	class USpringArmComponent* SpringArmComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))	// Camera follows the character
 	class UCameraComponent* FollowCamera;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Randomized gunshot sound cue
-	class USoundCue* FireSound;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Flash spawned at BarrelSocket
-	class UParticleSystem* MuzzelFlash;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Particles spawned upon bullet Impact
 	UParticleSystem* ImpactParticles;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Smoke trail for bullets
@@ -313,7 +309,6 @@ private:
 	FTimerHandle CrosshairShootTimer;
 	bool bFireButtonPressed;				// Left mouse button or right console trigger pressed 
 	bool bShouldFire;						// True when we can fire. False when waiting for the timer
-	float AutomaticFireRate;				// Rate of automatic gun fire
 	FTimerHandle AutoFireTimer;				// Sets a timer between gunshots
 	bool bShouldTraceForItems;				// True if we should trace every frame for items
 	int8 OverlappedItemCount;				// Number of overlapped AItems

@@ -78,7 +78,6 @@ AShooterCharacter::AShooterCharacter() :
 	// Automatic fire variables
 	bFireButtonPressed(false),
 	bShouldFire(true),
-	AutomaticFireRate(.1f),
 
 	// Item trace variables
 	bShouldTraceForItems(false),
@@ -374,7 +373,6 @@ void AShooterCharacter::FireWeapon()
 		SendBullet();
 		PlayGunfireMontage();
 		EquippedWeapon->DecrementAmmo();
-		
 		StartFireTimer();
 	}
 }
@@ -459,17 +457,14 @@ void AShooterCharacter::SelectButtonPressed()
 	}
 }
 
-void AShooterCharacter::SelectButtonReleased()
-{
-
-}
+void AShooterCharacter::SelectButtonReleased(){}
 
 void AShooterCharacter::PlayFireSound()
 {
 	// Play Fire sound
-	if (FireSound)
+	if (EquippedWeapon->GetFireSound())
 	{
-		UGameplayStatics::PlaySound2D(this, FireSound);
+		UGameplayStatics::PlaySound2D(this, EquippedWeapon->GetFireSound());
 	}
 }
 
@@ -481,9 +476,9 @@ void AShooterCharacter::SendBullet()
 	{
 		const FTransform SocketTransform = BarrelSocket->GetSocketTransform(EquippedWeapon->GetItemMesh());	// TODO -> FTransform <- Need a comment  
 
-		if (MuzzelFlash)
+		if (EquippedWeapon->GetMuzzleFalsh())
 		{
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzelFlash, SocketTransform);
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), EquippedWeapon->GetMuzzleFalsh(), SocketTransform);
 
 		}
 
@@ -831,8 +826,10 @@ void AShooterCharacter::FireButtonReleased()
 
 void AShooterCharacter::StartFireTimer()
 {
+	if (EquippedWeapon == nullptr) return;
+
 	CombatState = ECombatState::ECS_FireTimerInPorgess;
-	GetWorldTimerManager().SetTimer(AutoFireTimer, this, &AShooterCharacter::AutoFireReset, AutomaticFireRate);
+	GetWorldTimerManager().SetTimer(AutoFireTimer, this, &AShooterCharacter::AutoFireReset, EquippedWeapon->GetAutoFireRate());
 }
 
 void AShooterCharacter::TraceForItems()
