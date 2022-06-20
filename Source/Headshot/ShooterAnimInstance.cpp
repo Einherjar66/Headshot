@@ -37,7 +37,7 @@ void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime)
 {
 	if (ShooterCharacter == nullptr)															// Wenn der ShooterCharacter null ist.
 	{ 
-		ShooterCharacter = Cast<AShooterCharacter>(TryGetPawnOwner());							// Dann versuch die AnimInstance wieder zurückzuholen.
+		ShooterCharacter = Cast<AShooterCharacter>(TryGetPawnOwner());						// Dann versuch die AnimInstance wieder zurückzuholen.
 	}
 
 	if (ShooterCharacter)

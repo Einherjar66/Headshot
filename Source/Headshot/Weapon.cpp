@@ -11,7 +11,12 @@ AWeapon::AWeapon() :
 	WeaponType(EWeaponType::EWT_SubmachinGun),
 	AmmoType(EAmmoType::EAT_9mm),
 	ReloadMontageSection(FName(TEXT("ReloadSMG"))),
-	ClipBoneName(FName(TEXT("smg_clip")))
+	ClipBoneName(FName(TEXT("smg_clip"))),
+	SlideDisplacement(0.f),
+	SlideDisplacementTime(0.2f),
+	bMovingSlide(false),
+	MaxSlideDisplacement(4.f),
+	MaxRecoilRotation(20.f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -26,12 +31,20 @@ void AWeapon::Tick(float DeltaTime)
 		const FRotator MeshRotation{ 0.f, GetItemMesh()->GetComponentRotation().Yaw, 0.f };
 		GetItemMesh()->SetWorldRotation(MeshRotation, false, nullptr, ETeleportType::TeleportPhysics);
 	}
-}
 
+	// Update slide on pistol
+	UpdateSlideDisplacement();
+}
 
 bool AWeapon::ClipIsFull()
 {
 	return Ammo >= MagazineCapacity;
+}
+
+void AWeapon::StartSlideTimer()
+{
+	bMovingSlide = true;
+	GetWorldTimerManager().SetTimer(SlideTimer, this, &AWeapon::FinishMovingSlide, SlideDisplacementTime);
 }
 
 void AWeapon::ThrowWeapon()
@@ -66,7 +79,7 @@ void AWeapon::DecrementAmmo()
 	}
 }
 
-void AWeapon::RelaodAmmo(int32 Amount)
+void AWeapon::ReloadAmmo(int32 Amount)
 {
 	checkf(Ammo + Amount <= MagazineCapacity,TEXT("Attempted to reload with more than magazine capacity"))
 	Ammo += Amount;
@@ -77,6 +90,22 @@ void AWeapon::StopFalling()
 	bFalling = false;
 	SetItemState(EItemState::EIS_Pickup);
 	StartPulseTimer();
+}
+
+void AWeapon::FinishMovingSlide()
+{
+	bMovingSlide = false;
+}
+
+void AWeapon::UpdateSlideDisplacement()
+{
+	if (SlideDisplacementCurve && bMovingSlide)
+	{
+		const float	ElapsedTime{ GetWorldTimerManager().GetTimerElapsed(SlideTimer) };
+		const float CurveValue{ SlideDisplacementCurve->GetFloatValue(ElapsedTime) };
+		SlideDisplacement = CurveValue * MaxSlideDisplacement;
+		RecoilRotation = CurveValue * MaxRecoilRotation;
+	}
 }
 
 void AWeapon::OnConstruction(const FTransform& Transform)
@@ -145,9 +174,7 @@ void AWeapon::OnConstruction(const FTransform& Transform)
 				EnableGlowMaterial();
 			}
 		}
-
 	}
-	
 }
 
 void AWeapon::BeginPlay()

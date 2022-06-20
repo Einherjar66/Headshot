@@ -374,6 +374,12 @@ void AShooterCharacter::FireWeapon()
 		PlayGunfireMontage();
 		EquippedWeapon->DecrementAmmo();
 		StartFireTimer();
+
+		if (EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Pistol)
+		{
+			// Start moving slide timer
+			EquippedWeapon->StartSlideTimer();
+		}
 	}
 }
 
@@ -780,14 +786,14 @@ void AShooterCharacter::FinishReload()
 		if (MagEmptySpace > CarriedAmmo)
 		{
 			// Reload the Magazine with all the ammo we are carrying
-			EquippedWeapon->RelaodAmmo(CarriedAmmo);
+			EquippedWeapon->ReloadAmmo(CarriedAmmo);
 			CarriedAmmo = 0;
 			AmmoMap.Add(AmmoType, CarriedAmmo);
 		}
 		else
 		{
 			// fill the Magazine
-			EquippedWeapon->RelaodAmmo(MagEmptySpace);
+			EquippedWeapon->ReloadAmmo(MagEmptySpace);
 			CarriedAmmo -= MagEmptySpace;
 			AmmoMap.Add(AmmoType, CarriedAmmo);
 		}
@@ -879,7 +885,7 @@ void AShooterCharacter::TraceForItems()
 				}
 				else
 				{
-					 // the inventory is not full
+					// the inventory is not full
 					TraceHitItem->SetCharaterInventoryFull(false);
 				}
 			}

@@ -79,13 +79,14 @@ public:
 protected:
 
 	void StopFalling();
+	void FinishMovingSlide();
+	void UpdateSlideDisplacement();
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
 private:
 
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly, Category = "Weapon Properties", meta = (AllowPrivateAccess = "true"))		// True when moving the clip while reloading
 	bool bMovingClip;				
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Properties", meta = (AllowPrivateAccess = "true"))		// Ammo cout for this Weapon
 	int32 Ammo;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Properties", meta = (AllowPrivateAccess = "true"))		// Maximum ammo that our weapon can hold
@@ -119,6 +120,25 @@ private:
 	USoundCue* FireSound;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data Table", meta = (AllowPrivateAccess = "true"))			// Name of the bone to hide on the weapon mesh
 	FName BoneToHide;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Pistol", meta = (AllowPrivateAccess = "true"))				// Amount that the slide is puched back during pistol fire
+	float SlideDisplacement;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pistol", meta = (AllowPrivateAccess = "true"))					// Cureve for the slide displacement
+	UCurveFloat* SlideDisplacementCurve;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Pistol", meta = (AllowPrivateAccess = "true"))				// True when moving the pistol slide
+	bool bMovingSlide;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pistol", meta = (AllowPrivateAccess = "true"))					// Max distance for the slide on the pistol
+	float MaxSlideDisplacement;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pistol", meta = (AllowPrivateAccess = "true"))					// Time for displacing the slide during pistol fire 
+	float SlideDisplacementTime;	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pistol", meta = (AllowPrivateAccess = "true"))					// Max rotation vor pistol recoil
+	float MaxRecoilRotation;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Pistol", meta = (AllowPrivateAccess = "true"))				// Amount that the pistol will rotate during pistol fire is puched back during pistol fire
+	float RecoilRotation;
+
+
+
+	FTimerHandle SlideTimer;		// Timer Handle for updating SlideDisplacement
 
 	int32 PreviousMaterialIndex;
 	FTimerHandle ThrowWeaponTimer;
@@ -126,9 +146,10 @@ private:
 	bool bFalling;
 public:
 
+	void StartSlideTimer();
 	void ThrowWeapon();				// Add a Impulse to the weapon
 	void DecrementAmmo();			// Called from Character class when firing weapon
-	void RelaodAmmo(int32 Amount);
+	void ReloadAmmo(int32 Amount);
 	bool ClipIsFull();
 
 	FORCEINLINE void SetMovingClip(bool Move) { bMovingClip = Move; }
@@ -143,4 +164,5 @@ public:
 	FORCEINLINE float GetAutoFireRate() const { return AutoFireRate; }
 	FORCEINLINE UParticleSystem* GetMuzzleFalsh() const { return MuzzleFlash; }
 	FORCEINLINE USoundCue* GetFireSound() const { return FireSound; }
+
 };
