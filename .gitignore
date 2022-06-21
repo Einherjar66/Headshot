@@ -57,6 +57,10 @@ Build/*
 Build/*/**
 !Build/*/PakBlacklist*.txt
 
+# 
+Content/KiteDemo/**
+Content/ParagonProps/**
+
 # Don't ignore icon files in Build
 !Build/**/*.ico
 
