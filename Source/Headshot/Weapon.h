@@ -61,6 +61,8 @@ struct FWeaponDataTable : public FTableRowBase
 	USoundCue* FireSound;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName BoneToHide;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bAutomatic;
 }; 
 
 /**
@@ -99,7 +101,9 @@ private:
 	FName ReloadMontageSection;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Properties", meta = (AllowPrivateAccess = "true"))		// Name for the clip Bone
 	FName ClipBoneName;
-	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties", meta = (AllowPrivateAccess = "true"))		// True for auto gunfire
+	bool bAutomatic;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category ="Data Table", meta = (AllowPrivateAccess = "true"))			// Data Table for weapon properties
 	UDataTable* WeaponDataTable;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data Table", meta = (AllowPrivateAccess = "true"))			// Texture for the weapon Crosshairs
@@ -137,7 +141,6 @@ private:
 	float RecoilRotation;
 
 
-
 	FTimerHandle SlideTimer;		// Timer Handle for updating SlideDisplacement
 
 	int32 PreviousMaterialIndex;
@@ -164,5 +167,5 @@ public:
 	FORCEINLINE float GetAutoFireRate() const { return AutoFireRate; }
 	FORCEINLINE UParticleSystem* GetMuzzleFalsh() const { return MuzzleFlash; }
 	FORCEINLINE USoundCue* GetFireSound() const { return FireSound; }
-
+	FORCEINLINE bool GetAutomatic() const { return bAutomatic; }
 };
