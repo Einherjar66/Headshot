@@ -60,11 +60,14 @@ protected:
 	void FinishReload();
 	UFUNCTION(BlueprintCallable)
 	void FinishEquipping();
+	UFUNCTION(BlueprintCallable)
+	EPhysicalSurface GetSurfaceType();
 	UFUNCTION()
 	void AutoFireReset();
 	UFUNCTION()
 	void FinishCrosshairBulletFire();
 
+	
 	void MoveForward(float Value);										// Called for Forward / backward input
 	void MoveRight(float Value);										// Called for side to side input
 	void FireWeapon();													// Called when fire Button is pressed

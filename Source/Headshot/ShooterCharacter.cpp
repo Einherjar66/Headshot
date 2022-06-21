@@ -4,7 +4,6 @@
 #include "ShooterCharacter.h"
 
 #include "GameFramework/SpringArmComponent.h"
-
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/WidgetComponent.h"
@@ -15,7 +14,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
 
+#include "Headshot.h"
 #include "Item.h"
 #include "Ammo.h"
 #include "Weapon.h"
@@ -811,6 +812,19 @@ void AShooterCharacter::FinishEquipping()
 	{
 		Aim();
 	}
+}
+
+EPhysicalSurface AShooterCharacter::GetSurfaceType()
+{
+	FHitResult HitResult;
+	const FVector Start{ GetActorLocation() };
+	const FVector End{ Start + FVector(0.f,0.f,-400.f) };
+	FCollisionQueryParams QueryParams;
+	QueryParams.bReturnPhysicalMaterial = true;
+	GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, QueryParams);
+	auto HitSurface = HitResult.PhysMaterial->SurfaceType;
+
+	return UPhysicalMaterial::DetermineSurfaceType(HitResult.PhysMaterial.Get());
 }
 
 void AShooterCharacter::SetLookUpRates()
