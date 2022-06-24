@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "BulletHitInterface.h"
 #include "Enemy.generated.h"
 
 UCLASS()
-class HEADSHOT_API AEnemy : public ACharacter
+class HEADSHOT_API AEnemy : public ACharacter, public IBulletHitInterface
 {
 	GENERATED_BODY()
 
@@ -19,6 +20,12 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"));		// Particles to spawn when hit by bullets
+	class UParticleSystem* ImpactParticle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"));		// Sound to play when hit by bullets
+	class USoundCue* ImpactSound;
+
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -26,4 +33,5 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual void BulletHit_Implementation(FHitResult HitResult) override;
 };
