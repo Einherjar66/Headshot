@@ -62,6 +62,8 @@ Content/KiteDemo/**
 Content/ParagonProps/**
 Content/ParagonTwinblast/**
 Content/ParagonGrux/**
+
+
 # Don't ignore icon files in Build
 !Build/**/*.ico
 
@@ -77,3 +79,4 @@ Plugins/*/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+*.zip
