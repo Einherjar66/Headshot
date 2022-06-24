@@ -91,7 +91,7 @@ protected:
 	void StartFireTimer();
 	void CalculateCrosshairSpread(float DeltaTime);
 	void StartCrosshairBulletFire();
-	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBemLocation);
+	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FHitResult& OutHitResult);
 	void CameraZoomIn(float DeltaTime);
 
 	void SelectButtonPressed();
