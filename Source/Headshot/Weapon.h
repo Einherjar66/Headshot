@@ -155,6 +155,7 @@ private:
 	FTimerHandle ThrowWeaponTimer;
 	float ThrowWeaponTime;
 	bool bFalling;
+
 public:
 
 	void StartSlideTimer();

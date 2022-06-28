@@ -27,8 +27,9 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void HideHealthBar();
 	
-
 	void Die();
+	void PlayHitMontage(FName Section, float Playrate = 1.f);
+	void ResetHitReactTimer();
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"));		// Particles to spawn when hit by bullets
 	class UParticleSystem* ImpactParticle;
@@ -42,9 +43,16 @@ private:
 	FString HeadBone;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"));		// Time to Display health bar once shot
 	float HealthBarDisplayTime;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"));		// Montage containing Hit & Death animations
+	UAnimMontage* HitMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"));		// 
+	float HitReactTimeMin;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"));		// 
+	float HitReactTimeMax;
 
 	FTimerHandle HealthBarTimer;
-
+	FTimerHandle HitReactTimer;
+	bool bCanHitReact;
 
 public:	
 	// Called every frame

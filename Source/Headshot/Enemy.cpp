@@ -7,7 +7,7 @@
 #include "Particles/ParticleSystemComponent.h"
 
 // Sets default values
-AEnemy::AEnemy() : Health (100.f), MaxHealth(100.f), HealthBarDisplayTime(4.f)
+AEnemy::AEnemy() : Health(100.f), MaxHealth(100.f), HealthBarDisplayTime(4.f), bCanHitReact(true), HitReactTimeMin(.5f), HitReactTimeMax(3.f)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -33,6 +33,27 @@ void AEnemy::ShowHealthBar_Implementation()
 void AEnemy::Die()
 {
 	HideHealthBar();
+}
+
+void AEnemy::PlayHitMontage(FName Section, float Playrate)
+{
+	if (bCanHitReact)
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_Play(HitMontage, Playrate);
+			AnimInstance->Montage_JumpToSection(Section, HitMontage);
+		}
+		bCanHitReact = false;
+		const float HitReactDelay{ FMath::FRandRange(HitReactTimeMin,HitReactTimeMax) };
+		GetWorldTimerManager().SetTimer(HitReactTimer, this, &AEnemy::ResetHitReactTimer, HitReactDelay);
+	} 
+}
+
+void AEnemy::ResetHitReactTimer()
+{
+	bCanHitReact = true;
 }
 
 // Called every frame
@@ -61,6 +82,7 @@ void AEnemy::BulletHit_Implementation(FHitResult HitResult)
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, HitResult.Location, FRotator(0.f), true);
 	}
 	ShowHealthBar();
+	PlayHitMontage(FName("HitReact_Front"));
 }
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
