@@ -20,7 +20,15 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UFUNCTION(BlueprintNativeEvent)
+	void ShowHealthBar();
+	void ShowHealthBar_Implementation();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void HideHealthBar();
 	
+
+	void Die();
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"));		// Particles to spawn when hit by bullets
 	class UParticleSystem* ImpactParticle;
@@ -32,6 +40,11 @@ private:
 	float MaxHealth;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"));		// Name of the head bone
 	FString HeadBone;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"));		// Time to Display health bar once shot
+	float HealthBarDisplayTime;
+
+	FTimerHandle HealthBarTimer;
+
 
 public:	
 	// Called every frame

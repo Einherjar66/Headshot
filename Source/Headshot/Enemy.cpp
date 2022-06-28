@@ -7,7 +7,7 @@
 #include "Particles/ParticleSystemComponent.h"
 
 // Sets default values
-AEnemy::AEnemy() : Health (100.f), MaxHealth(100.f)
+AEnemy::AEnemy() : Health (100.f), MaxHealth(100.f), HealthBarDisplayTime(4.f)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -21,6 +21,18 @@ void AEnemy::BeginPlay()
 	
 	// stellt ein das der Gegner den Line trace des Spieles blockt, und somit getroffen werden kann
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility,ECollisionResponse::ECR_Block); 
+}
+
+void AEnemy::ShowHealthBar_Implementation()
+{
+	GetWorldTimerManager().ClearTimer(HealthBarTimer);
+	GetWorldTimerManager().SetTimer(HealthBarTimer, this, &AEnemy::HideHealthBar, HealthBarDisplayTime);
+
+}
+
+void AEnemy::Die()
+{
+	HideHealthBar();
 }
 
 // Called every frame
@@ -48,6 +60,7 @@ void AEnemy::BulletHit_Implementation(FHitResult HitResult)
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, HitResult.Location, FRotator(0.f), true);
 	}
+	ShowHealthBar();
 }
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -55,6 +68,7 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	if (Health - DamageAmount <= 0.f)
 	{
 		Health = 0.f;
+		Die();
 	}
 	else
 	{
