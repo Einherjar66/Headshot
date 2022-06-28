@@ -509,19 +509,24 @@ void AShooterCharacter::SendBullet()
 				AEnemy* HitEnemy = Cast<AEnemy>(BeamHitResult.Actor.Get());
 				if(HitEnemy)
 				{
-					if (BeamHitResult.BoneName.ToString() == HitEnemy->GetHeadBone()) // checkt ob der Kopf des Gegners getroffen wird
+					int32 Damage{};
+					if (BeamHitResult.BoneName.ToString() == HitEnemy->GetHeadBone()) // checkt ob der Kopf des Gegners getroffen wurde
 					{
+						// Get the Damage to show on the viewport
+						Damage = EquippedWeapon->GetHeadShotDamage();
+
 						// Head shot damage
-						UGameplayStatics::ApplyDamage(BeamHitResult.Actor.Get(), EquippedWeapon->GetHeadShotDamage(), GetController(), this, UDamageType::StaticClass());
-						UE_LOG(LogTemp, Warning, TEXT("%s"), *BeamHitResult.BoneName.ToString());
+						UGameplayStatics::ApplyDamage(BeamHitResult.Actor.Get(), Damage, GetController(), this, UDamageType::StaticClass());
 					}
 					else
 					{
-						// Body shot
-						UGameplayStatics::ApplyDamage(BeamHitResult.Actor.Get(), EquippedWeapon->GetDamage(), GetController(), this, UDamageType::StaticClass());
-						UE_LOG(LogTemp, Warning, TEXT("%s"), *BeamHitResult.BoneName.ToString());
-					}
+						// Get the Damage to show on the viewport
+						Damage = EquippedWeapon->GetDamage();
 
+						// Body shot
+						UGameplayStatics::ApplyDamage(BeamHitResult.Actor.Get(), Damage, GetController(), this, UDamageType::StaticClass());
+					}
+					HitEnemy->ShowHitNumer(Damage, BeamHitResult.Location);
 				}
 			}
 

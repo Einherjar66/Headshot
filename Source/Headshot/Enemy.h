@@ -27,9 +27,15 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void HideHealthBar();
 	
+	UFUNCTION(BlueprintCallable)
+	void StoreHitNumber(UUserWidget* HitNumber, FVector Location);
+	UFUNCTION()
+	void DestroyHitNumber(UUserWidget* HitNumber);
+
 	void Die();
 	void PlayHitMontage(FName Section, float Playrate = 1.f);
 	void ResetHitReactTimer();
+
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"));		// Particles to spawn when hit by bullets
 	class UParticleSystem* ImpactParticle;
@@ -49,6 +55,10 @@ private:
 	float HitReactTimeMin;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"));		// 
 	float HitReactTimeMax;
+	UPROPERTY(VisibleAnywhere, Category = "Combat", meta = (AllowPrivateAccess = "true"));						// Map to store Hitnumber widgets and thier hit locations
+	TMap<UUserWidget*, FVector> HitNumbers;
+	UPROPERTY(EditAnywhere, Category = "Combat", meta = (AllowPrivateAccess = "true"));							// Time before a HitNumber is removed from the screen
+	float HitNumberDestroyTime;
 
 	FTimerHandle HealthBarTimer;
 	FTimerHandle HitReactTimer;
@@ -62,6 +72,9 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BulletHit_Implementation(FHitResult HitResult) override;
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void ShowHitNumer(int32 Damage, FVector HitLocation);
 
 	FORCEINLINE FString GetHeadBone(){ return HeadBone; }
 };
