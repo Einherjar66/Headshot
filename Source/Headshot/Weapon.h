@@ -63,6 +63,10 @@ struct FWeaponDataTable : public FTableRowBase
 	FName BoneToHide;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bAutomatic;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Damage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HeadShotDamage;
 }; 
 
 /**
@@ -103,6 +107,10 @@ private:
 	FName ClipBoneName;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties", meta = (AllowPrivateAccess = "true"))		// True for auto gunfire
 	bool bAutomatic;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties", meta = (AllowPrivateAccess = "true"))		// Amount of damage caused by a bullet
+	float Damage;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Properties", meta = (AllowPrivateAccess = "true"))		// Amount of damage when a bullet hits the head
+	float HeadShotDamage;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category ="Data Table", meta = (AllowPrivateAccess = "true"))			// Data Table for weapon properties
 	UDataTable* WeaponDataTable;
@@ -155,6 +163,7 @@ public:
 	void ReloadAmmo(int32 Amount);
 	bool ClipIsFull();
 
+
 	FORCEINLINE void SetMovingClip(bool Move) { bMovingClip = Move; }
 	FORCEINLINE EWeaponType GetWeaponType()		const { return WeaponType; }
 	FORCEINLINE int32 GetAmmo()					const { return Ammo; }
@@ -168,4 +177,7 @@ public:
 	FORCEINLINE UParticleSystem* GetMuzzleFalsh() const { return MuzzleFlash; }
 	FORCEINLINE USoundCue* GetFireSound() const { return FireSound; }
 	FORCEINLINE bool GetAutomatic() const { return bAutomatic; }
+	FORCEINLINE float GetDamage() const { return Damage; }
+	FORCEINLINE float GetHeadShotDamage() const { return HeadShotDamage; }
+
 };

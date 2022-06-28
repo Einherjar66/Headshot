@@ -21,6 +21,7 @@
 #include "Ammo.h"
 #include "Weapon.h"
 #include "BulletHitInterface.h"
+#include "Enemy.h"
 #include "DrawDebugHelpers.h"
 
 // Sets default values
@@ -503,6 +504,24 @@ void AShooterCharacter::SendBullet()
 				if (BulletHitInterface)
 				{
 					BulletHitInterface->BulletHit_Implementation(BeamHitResult);
+				}
+
+				AEnemy* HitEnemy = Cast<AEnemy>(BeamHitResult.Actor.Get());
+				if(HitEnemy)
+				{
+					if (BeamHitResult.BoneName.ToString() == HitEnemy->GetHeadBone()) // checkt ob der Kopf des Gegners getroffen wird
+					{
+						// Head shot damage
+						UGameplayStatics::ApplyDamage(BeamHitResult.Actor.Get(), EquippedWeapon->GetHeadShotDamage(), GetController(), this, UDamageType::StaticClass());
+						UE_LOG(LogTemp, Warning, TEXT("%s"), *BeamHitResult.BoneName.ToString());
+					}
+					else
+					{
+						// Body shot
+						UGameplayStatics::ApplyDamage(BeamHitResult.Actor.Get(), EquippedWeapon->GetDamage(), GetController(), this, UDamageType::StaticClass());
+						UE_LOG(LogTemp, Warning, TEXT("%s"), *BeamHitResult.BoneName.ToString());
+					}
+
 				}
 			}
 
@@ -1179,7 +1198,6 @@ void AShooterCharacter::GetPickupItem(AItem* Item)
 	{
 		PickupAmmo(Ammo);
 	}
-
 }
 
 // No longer needed; AItem has GetInterpLocation
