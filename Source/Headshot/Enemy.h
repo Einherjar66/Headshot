@@ -60,6 +60,9 @@ private:
 	TMap<UUserWidget*, FVector> HitNumbers;
 	UPROPERTY(EditAnywhere, Category = "Combat", meta = (AllowPrivateAccess = "true"));							// Time before a HitNumber is removed from the screen
 	float HitNumberDestroyTime;
+	UPROPERTY(EditAnywhere, Category = "BehaviorTree", meta = (AllowPrivateAccess = "true"));					// BehaviorTree for the AI Character
+	class UBehaviorTree* BehaviorTree;
+
 
 	FTimerHandle HealthBarTimer;
 	FTimerHandle HitReactTimer;
@@ -78,4 +81,5 @@ public:
 	void ShowHitNumer(int32 Damage, FVector HitLocation, bool HeadShot);
 
 	FORCEINLINE FString GetHeadBone(){ return HeadBone; }
+	FORCEINLINE UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
 };
