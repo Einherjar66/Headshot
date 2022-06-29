@@ -35,6 +35,7 @@ protected:
 	void Die();
 	void PlayHitMontage(FName Section, float Playrate = 1.f);
 	void ResetHitReactTimer();
+	void UpdateHitNumber();
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"));		// Particles to spawn when hit by bullets
@@ -74,7 +75,7 @@ public:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void ShowHitNumer(int32 Damage, FVector HitLocation);
+	void ShowHitNumer(int32 Damage, FVector HitLocation, bool HeadShot);
 
 	FORCEINLINE FString GetHeadBone(){ return HeadBone; }
 };

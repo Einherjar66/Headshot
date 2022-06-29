@@ -515,6 +515,8 @@ void AShooterCharacter::SendBullet()
 						// Get the Damage to show on the viewport
 						Damage = EquippedWeapon->GetHeadShotDamage();
 
+						HitEnemy->ShowHitNumer(Damage, BeamHitResult.Location, true);
+
 						// Head shot damage
 						UGameplayStatics::ApplyDamage(BeamHitResult.Actor.Get(), Damage, GetController(), this, UDamageType::StaticClass());
 					}
@@ -523,10 +525,11 @@ void AShooterCharacter::SendBullet()
 						// Get the Damage to show on the viewport
 						Damage = EquippedWeapon->GetDamage();
 
+						HitEnemy->ShowHitNumer(Damage, BeamHitResult.Location, false);
+
 						// Body shot
 						UGameplayStatics::ApplyDamage(BeamHitResult.Actor.Get(), Damage, GetController(), this, UDamageType::StaticClass());
-					}
-					HitEnemy->ShowHitNumer(Damage, BeamHitResult.Location);
+					}	
 				}
 			}
 
