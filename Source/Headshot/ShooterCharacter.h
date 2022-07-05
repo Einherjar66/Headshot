@@ -16,6 +16,7 @@ enum class ECombatState : uint8
 	ECS_FireTimerInPorgess	UMETA(DisplayName = "FireTimerInPorgess"),
 	ECS_Reloading			UMETA(DisplayName = "Reloading"),
 	ECS_Equipping			UMETA(DisplayName = "Equipping"),
+	ECS_Stunned				UMETA(DisplayName = "Stunned"),
 
 	ECS_MAX					UMETA(DisplayName = "DefaultMAX")
 };
@@ -50,6 +51,10 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	// Take combat damage
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
+	
 protected:
 	
 	// Called when the game starts or when spawned
@@ -66,8 +71,12 @@ protected:
 	void AutoFireReset();
 	UFUNCTION()
 	void FinishCrosshairBulletFire();
+	UFUNCTION(BlueprintCallable)
+	void EndStund();
+	UFUNCTION(BlueprintCallable)
+	void FinishDeath();
 
-	
+	void Die();
 	void MoveForward(float Value);										// Called for Forward / backward input
 	void MoveRight(float Value);										// Called for side to side input
 	void FireWeapon();													// Called when fire Button is pressed
@@ -251,7 +260,21 @@ private:
 	FTransform ClipTransform;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// Scene component to attach to the Charater's hand during reloading
 	USceneComponent* HandSceneComponent;
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))			// Character Health
+	float Health;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))			// Character maxhealth
+	float MaxHealth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))			// Chance of being stunned when hit by an enemy
+	float StunChance;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))			// Sound made when Character gets hit by a melee attack
+	class USoundCue* MeleeImpactSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))			// Blood splatter particles for melee hit
+	UParticleSystem* BloodParicles;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))			// Hit react anim montage for characte is stunned
+	UAnimMontage* HitReactMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))			// Montage for Character death
+	UAnimMontage* DeathMontage;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))		// True when Crouching
 	bool bCrouching;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))		// Regaular movement speed
@@ -340,6 +363,9 @@ public:
 	FORCEINLINE bool ShouldPlayPickupSound() const { return bShouldPlayPickupSound; }
 	FORCEINLINE bool ShouldPlayEquipSound() const { return bShouldPlayEquipSound; }
 	FORCEINLINE AWeapon* GetEquippedWeapon() const { return EquippedWeapon; }
+	FORCEINLINE USoundCue* GetMeleeImpactSound() const { return MeleeImpactSound; }
+	FORCEINLINE UParticleSystem* GetBloodParticles() const { return BloodParicles; }
+	FORCEINLINE float GetStunChance() const { return StunChance; }
 
 	FInterpLocation GetFInterpLocation(int32 Index);
 
@@ -351,6 +377,7 @@ public:
 	void IncrementOverlappedItemCount(int8 Amount);			// Adds/ subtracts to/from OverlappedItemCount and updates bShouldTraceForItems
 	void GetPickupItem(AItem* Item);
 	void UnHighlightInventorySlot();
+	void Stun();
 
 	// No longer needed; AItem has GetInterpLocation
 	/*FVector GetCameraInterpLocation();*/

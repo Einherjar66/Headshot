@@ -15,6 +15,7 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 #include "Headshot.h"
 #include "Item.h"
@@ -22,6 +23,8 @@
 #include "Weapon.h"
 #include "BulletHitInterface.h"
 #include "Enemy.h"
+#include "EnemyController.h"
+
 #include "DrawDebugHelpers.h"
 
 // Sets default values
@@ -99,7 +102,12 @@ AShooterCharacter::AShooterCharacter() :
 	PickupSoundResetTime(.2f),
 	
 	//Icon animation prperty
-	HighlightedSlot(-1)
+	HighlightedSlot(-1),
+
+	Health(100.f),
+	MaxHealth(100.f),
+
+	StunChance(.25f)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -342,6 +350,36 @@ void AShooterCharacter::FinishCrosshairBulletFire()
 	bFiringBullet = false;
 }
 
+void AShooterCharacter::EndStund()
+{
+	CombatState = ECombatState::ECS_Unoccupied;
+
+	if (bAimingButtonPressed)
+	{
+		Aim();
+	}
+}
+
+void AShooterCharacter::FinishDeath()
+{
+	GetMesh()->bPauseAnims = true;
+	APlayerController * PlayerCon =UGameplayStatics::GetPlayerController(this, 0);
+
+	if (PlayerCon)
+	{
+		DisableInput(PlayerCon);
+	}
+}
+
+void AShooterCharacter::Die()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && DeathMontage)
+	{
+		AnimInstance->Montage_Play(DeathMontage);	
+	}
+}
+
 void AShooterCharacter::GrabClip()
 {
 	if (EquippedWeapon == nullptr) return;
@@ -389,7 +427,7 @@ void AShooterCharacter::FireWeapon()
 void AShooterCharacter::AimingButtonPressed()
 {
 	bAimingButtonPressed = true;
-	if (CombatState != ECombatState::ECS_Reloading && CombatState != ECombatState::ECS_Equipping)
+	if (CombatState != ECombatState::ECS_Reloading && CombatState != ECombatState::ECS_Equipping && CombatState != ECombatState::ECS_Stunned)
 	{
 		Aim();
 	}
@@ -784,6 +822,19 @@ void AShooterCharacter::UnHighlightInventorySlot()
 	HighlightedSlot = -1;
 }
 
+void AShooterCharacter::Stun()
+{
+	if (Health <= 0.f) return;
+
+	CombatState = ECombatState::ECS_Stunned;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		AnimInstance->Montage_Play(HitReactMontage);
+	}
+}
+
 int32 AShooterCharacter::GetInterpLocationIndex()
 {
 	int32 LowestIndex = 1;
@@ -812,6 +863,8 @@ void AShooterCharacter::IncrementInterpLocItemCount(int32 Index, int32 Amount)
 
 void AShooterCharacter::FinishReload()
 {
+	if (CombatState == ECombatState::ECS_Stunned) return;
+
 	// Update the combat state
 	CombatState = ECombatState::ECS_Unoccupied;
 
@@ -851,6 +904,7 @@ void AShooterCharacter::FinishReload()
 
 void AShooterCharacter::FinishEquipping()
 {
+	if (CombatState == ECombatState::ECS_Stunned) return;
 	CombatState = ECombatState::ECS_Unoccupied;
 	if (bAimingButtonPressed)
 	{
@@ -1112,6 +1166,8 @@ void AShooterCharacter::InitializeAmmoMap()
 
 void AShooterCharacter::AutoFireReset()
 {
+	if (CombatState == ECombatState::ECS_Stunned) return;
+
 	CombatState = ECombatState::ECS_Unoccupied;
 	if (EquippedWeapon == nullptr) return;
 
@@ -1249,4 +1305,25 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("WeaponSlot3", IE_Pressed, this, &AShooterCharacter::WeaponSlotThreeKeyPressed);
 	PlayerInputComponent->BindAction("WeaponSlot4", IE_Pressed, this, &AShooterCharacter::WeaponSlotFourKeyPressed);
 	PlayerInputComponent->BindAction("WeaponSlot5", IE_Pressed, this, &AShooterCharacter::WeaponSlotFiveKeyPressed);
+}
+
+float AShooterCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
+{
+	if (Health - DamageAmount <= 0.f)
+	{
+		Health = 0.f;
+		Die();
+
+		auto EnemyController = Cast<AEnemyController>(EventInstigator);
+		if (EnemyController)
+		{
+			EnemyController->GetBlackboardComponent()->SetValueAsBool(FName("CharacterDead"), true);
+		}
+	}
+	else
+	{
+		Health -= DamageAmount;
+	}
+
+	return DamageAmount;
 }
