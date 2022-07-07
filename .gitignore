@@ -62,7 +62,7 @@ Content/KiteDemo/**
 Content/ParagonProps/**
 Content/ParagonTwinblast/**
 Content/ParagonGrux/**
-
+Content/ParagonKhaimera/**
 
 # Don't ignore icon files in Build
 !Build/**/*.ico
