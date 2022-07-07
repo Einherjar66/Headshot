@@ -142,11 +142,6 @@ void AEnemy::SetStunned(bool Stunned)
 	{
 		EnemyController->GetBlackboardComponent()->SetValueAsBool("Stunned",Stunned);
 	}
-	if (EnemyController)
-	{
-		EnemyController->GetBlackboardComponent()->SetValueAsBool(FName("Dead"), true);
-		EnemyController->StopMovement();
-	}
 }
 
 void AEnemy::Die()
@@ -159,6 +154,12 @@ void AEnemy::Die()
 	{
 		AnimInstace->Montage_Play(DeathMontage);
 		
+	}
+
+	if (EnemyController)
+	{
+		EnemyController->GetBlackboardComponent()->SetValueAsBool(FName("Dead"), true);
+		EnemyController->StopMovement();
 	}
 	
 }
