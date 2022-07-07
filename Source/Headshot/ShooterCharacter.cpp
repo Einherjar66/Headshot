@@ -363,7 +363,7 @@ void AShooterCharacter::EndStund()
 void AShooterCharacter::FinishDeath()
 {
 	GetMesh()->bPauseAnims = true;
-	APlayerController * PlayerCon =UGameplayStatics::GetPlayerController(this, 0);
+	APlayerController * PlayerCon = UGameplayStatics::GetPlayerController(this, 0);
 
 	if (PlayerCon)
 	{
