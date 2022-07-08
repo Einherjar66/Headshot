@@ -57,7 +57,7 @@ Build/*
 Build/*/**
 !Build/*/PakBlacklist*.txt
 
-# 
+# Ignore unnecessary content
 Content/KiteDemo/**
 Content/ParagonProps/**
 Content/ParagonTwinblast/**
