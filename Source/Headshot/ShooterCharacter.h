@@ -274,6 +274,8 @@ private:
 	UAnimMontage* HitReactMontage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))			// Montage for Character death
 	UAnimMontage* DeathMontage;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))		// true when Character dies
+	bool bDead;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))		// True when Crouching
 	bool bCrouching;
